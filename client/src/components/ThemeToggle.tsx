@@ -2,15 +2,16 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import IconButton from "@mui/material/IconButton";
 import {Dispatch, SetStateAction} from "react";
+import {PaletteMode} from "@mui/material";
 
 interface ThemeToggleProps {
-    mode: string;
-    setMode: Dispatch<SetStateAction<string>>;
+    mode: PaletteMode;
+    setMode: Dispatch<SetStateAction<PaletteMode>>;
 }
 
 export const ThemeToggle = ({mode, setMode}: ThemeToggleProps) => {
     const handleToggle = () => {
-        let newMode;
+        let newMode: PaletteMode;
         if(mode === 'light'){
             newMode = 'dark';
         }else{

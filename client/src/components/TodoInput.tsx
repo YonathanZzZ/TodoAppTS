@@ -1,9 +1,9 @@
-import React, {Dispatch, SetStateAction, useState} from "react";
+import React, {useState} from "react";
 import Button from "@mui/material/Button";
 import {TextField} from "@mui/material";
 
 interface TodoInputProps {
-    addTodo: Dispatch<SetStateAction<string>>;
+    addTodo: (todo: string) => void;
 }
 
 const TodoInput = ({addTodo}: TodoInputProps) => {

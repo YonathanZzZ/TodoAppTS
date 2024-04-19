@@ -2,10 +2,10 @@ import io, { Socket } from 'socket.io-client';
 import * as TodosStateFunctions from './TodosStateFunctions';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Dispatch, SetStateAction } from 'react';
-
+import {TodoData} from '../interfaces/todo-item.interface';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap> | null = null;
 //TODO type of value of Map user to store tasks???
-const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStateAction<Map<number, any>>>) => {
+const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>) => {
     if(socket){
         return;
     }
@@ -18,7 +18,6 @@ const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStat
     });
 
     const onTaskAdded = (newTask) => {
-        console.log('newTask in onTaskAdded: ', newTask);
 
         const taskID = newTask.id;
         const taskData = newTask.taskData;

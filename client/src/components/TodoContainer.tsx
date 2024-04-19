@@ -5,9 +5,9 @@ import { useState } from "react";
 
 interface TodoContainerProps {
     todos: Map<string, any>; //TODO type of value in Map???
-    remove: () => void;
+    remove: (taskID: string) => void;
     edit: (taskID: string, editedText: string) => void;
-    toggleDone: () => void;
+    toggleDone: (taskID: string) => void;
 }
 
 const TodoContainer = ({todos, remove, edit, toggleDone}: TodoContainerProps) => {

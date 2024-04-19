@@ -20,11 +20,11 @@ import {ThemeToggle} from "./ThemeToggle";
 import TodoContainer from "./TodoContainer";
 import {initSocket, sendEvent} from './SocketManager';
 import * as TodosStateFunctions from "./TodosStateFunctions";
-import {Todo} from "../interfaces/todo-item.interface";
+import {Todo, TodoData} from "../interfaces/todo-item.interface";
 import { getMUITheme } from "./theme";
 
 function App() {
-    const [todos, setTodos] = useState(new Map<string, Todo>());
+    const [todos, setTodos] = useState(new Map<string, TodoData>());
     const [alertMessage, setAlertMessage] = useState("");
     const [email, setEmail] = useState("");
     const serverURL = import.meta.env.DEV
@@ -81,7 +81,6 @@ function App() {
     }, []);
 
     const tasksArrayToMap = (tasks: Todo[]) => {
-        console.log('tasks object: ', tasks);
         const resultMap = new Map();
         tasks.forEach(task => {
             const {id, ...rest} = task;
@@ -117,7 +116,7 @@ function App() {
         setAlertMessage("");
     };
 
-    const addTodoToState = (taskID: string, taskData) => {
+    const addTodoToState = (taskID: string, taskData: TodoData) => {
         TodosStateFunctions.addTodo(setTodos, taskID, taskData);
     };
 
@@ -165,10 +164,12 @@ function App() {
 
     const deleteTodo = (taskID: string) => {
         const todoDataBackup = todos.get(taskID);
-
+        if(!todoDataBackup) {
+            //task doesn't exist
+            return;
+        }
         deleteTodoFromState(taskID);
 
-        //remove from db
         deleteTaskFromDB(taskID)
             .then(() => {
                 sendEvent("deleteTask", taskID);
@@ -182,7 +183,10 @@ function App() {
     };
 
     const editContent = (taskID: string, updatedContent: string) => {
-        const contentBackup = todos.get(taskID).content;
+        const contentBackup = todos.get(taskID)?.content;
+        if(!contentBackup) {
+            return;
+        }
 
         editTodoOnState(taskID, updatedContent);
 
@@ -203,6 +207,10 @@ function App() {
 
     const toggleDone = (taskID: string) => {
         const task = todos.get(taskID);
+        if(!task){
+            return;
+        }
+
         const doneValue = task.done;
 
         toggleDoneOnState(taskID);

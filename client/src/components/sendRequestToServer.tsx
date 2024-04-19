@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Cookies from "js-cookie";
-
-const serverURL = import.meta.env.DEV ? 'http://localhost:8080' : '';
+console.log('PORT env var: ', import.meta.env.PORT);
+const serverURL = import.meta.env.DEV ? `http://localhost:8080` : '';
 
 const axiosInstance = axios.create({
     baseURL: serverURL,
