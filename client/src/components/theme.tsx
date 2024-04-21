@@ -1,6 +1,16 @@
 import {PaletteMode} from "@mui/material";
 import {ThemeOptions, createTheme} from "@mui/material/styles";
 
+declare module '@mui/material/styles' {
+    interface Palette {
+        delete: Palette['primary'];
+    }
+
+    interface PaletteOptions {
+        delete?: PaletteOptions['primary'];
+    }
+}
+
 const getDesignTokens = (mode: PaletteMode): ThemeOptions => ({
     palette: {
         mode,

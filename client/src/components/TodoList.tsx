@@ -3,12 +3,13 @@ import {List, ListItem} from '@mui/material';
 import Divider from '@mui/material/Divider';
 import {EditedItem} from "./EditedItem";
 import {TodoItem} from "./TodoItem";
+import {TodoData} from "../interfaces/todo-item.interface.ts";
 
 interface TodoListProps{
-    todos: Map<string, any>; //TODO type of value in Map???
-    remove: () => void;
+    todos: Map<string, TodoData>;
+    remove: (taskID: string) => void;
     edit: (taskID: string, updatedContent: string) => void;
-    toggleDone: () => void;
+    toggleDone: (taskID: string) => void;
     isDone: boolean;
 }
 

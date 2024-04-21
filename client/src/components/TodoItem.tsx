@@ -14,6 +14,12 @@ interface TodoItemProps {
     isDone: boolean
 }
 
+declare module '@mui/material/IconButton' {
+    interface IconButtonPropsColorOverrides {
+        delete: true;
+    }
+}
+
 export const TodoItem = ({id, content, remove, startEditing, toggleDone, isDone}: TodoItemProps) => {
     const theme = useTheme();
     return (

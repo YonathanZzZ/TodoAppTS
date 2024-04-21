@@ -2,11 +2,19 @@ import io, { Socket } from 'socket.io-client';
 import * as TodosStateFunctions from './TodosStateFunctions';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Dispatch, SetStateAction } from 'react';
-import {idType, TodoData} from '../interfaces/todo-item.interface';
+import {TodoData} from '../interfaces/todo-item.interface';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap> | null = null;
-//TODO type of value of Map user to store tasks???
+
+interface EventData {
+    addTask: {id: string, taskData: TodoData};
+    removeTask: {id: string};
+    editTask: {id: string, newContent: string};
+    changeTaskDone: {id: string, done: boolean};
+}
+
 const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>) => {
     if(socket){
+        //socket already initialized
         return;
     }
 
@@ -17,26 +25,25 @@ const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStat
         },
     });
 
-    const onTaskAdded = (newTask: {id: idType, taskData: TodoData}) => {
-        console.log('newTask: ', newTask);
+    const onTaskAdded = (newTask: {id: string, taskData: TodoData}) => {
         const taskID = newTask.id;
         const taskData = newTask.taskData;
 
         TodosStateFunctions.addTodo(setTodos, taskID, taskData);
     };
 
-    const onTaskRemoved = (taskID: string) => {
-        TodosStateFunctions.deleteTodo(setTodos, taskID);
+    const onTaskRemoved = (data: {id: string}) => {
+        TodosStateFunctions.deleteTodo(setTodos, data.id);
     };
 
-    const onTaskEdited = (data) => {
+    const onTaskEdited = (data: {id: string, newContent: string}) => {
         const taskID = data.id;
         const newContent = data.newContent;
 
         TodosStateFunctions.editTodo(setTodos, taskID, newContent);
     };
 
-    const onToggleDone = (data) => {
+    const onChangeTaskDone = (data: {id: string, done: boolean}) => {
         const taskID = data.id;
         const newDoneValue = data.done;
 
@@ -46,13 +53,41 @@ const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStat
     socket.on("addTask", onTaskAdded);
     socket.on("deleteTask", onTaskRemoved);
     socket.on("editTask", onTaskEdited);
-    socket.on("toggleDone", onToggleDone);
+    socket.on("toggleDone", onChangeTaskDone);
 
     socket.connect();
 }
 
-const sendEvent = (event, data) => {
-    socket.emit(event, data);
+const emitAddTask = (data: EventData["addTask"]) => {
+    if(!socket){
+        return;
+    }
+
+    socket.emit("addTask", data);
 }
 
-export {initSocket, sendEvent};
+const emitRemoveTask = (data: EventData["removeTask"]) => {
+    if(!socket){
+        return;
+    }
+
+    socket.emit("deleteTask", data);
+}
+
+const emitEditTask = (data: EventData["editTask"]) => {
+    if (!socket) {
+        return;
+    }
+
+    socket.emit("editTask", data);
+}
+
+const emitToggleDone = (data: EventData["changeTaskDone"]) => {
+    if (!socket) {
+        return;
+    }
+
+    socket.emit("toggleDone", data);
+}
+
+export {initSocket, emitAddTask, emitRemoveTask, emitEditTask, emitToggleDone};

@@ -18,7 +18,7 @@ import {AccountMenu} from "./AccountMenu";
 import {v4 as uuidv4} from "uuid";
 import {ThemeToggle} from "./ThemeToggle";
 import TodoContainer from "./TodoContainer";
-import {initSocket, sendEvent} from './SocketManager';
+import {emitAddTask, emitEditTask, emitRemoveTask, emitToggleDone, initSocket} from './SocketManager';
 import * as TodosStateFunctions from "./TodosStateFunctions";
 import {Todo, TodoData} from "../interfaces/todo-item.interface";
 import { getMUITheme } from "./theme";
@@ -147,11 +147,8 @@ function App() {
 
         addTaskToDB(newTodo)
             .then(() => {
-                //emit event to socket to update other clients of the same user
-
                 const {id, ...taskData} = newTodo;
-                const toEmit = {id, taskData};
-                sendEvent("addTask", toEmit);
+                emitAddTask({id, taskData});
             })
             .catch((error) => {
                 console.error("Error adding task to db: ", error);
@@ -172,7 +169,7 @@ function App() {
 
         deleteTaskFromDB(taskID)
             .then(() => {
-                sendEvent("deleteTask", taskID);
+                emitRemoveTask({id: taskID});
             })
             .catch(() => {
                 setAlertMessage("Failed to delete task on server");
@@ -192,10 +189,8 @@ function App() {
 
         editTaskOnDB({id: taskID}, {content: updatedContent})
             .then(() => {
-                sendEvent("editTask", {
-                    id: taskID,
-                    newContent: updatedContent,
-                });
+                emitEditTask({id: taskID,
+                    newContent: updatedContent});
             })
             .catch(() => {
                 setAlertMessage("Failed to update task on server");
@@ -217,7 +212,7 @@ function App() {
 
         editTaskOnDB({id: taskID}, {done: !doneValue})
             .then(() => {
-                sendEvent("toggleDone", {id: taskID, done: !doneValue});
+                emitToggleDone({id: taskID, done: !doneValue});
             })
             .catch(() => {
                 setAlertMessage("Failed to update task on server");
