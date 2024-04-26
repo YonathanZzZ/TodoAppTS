@@ -20,7 +20,7 @@ import {ThemeToggle} from "./ThemeToggle";
 import TodoContainer from "./TodoContainer";
 import {emitAddTask, emitEditTask, emitRemoveTask, emitToggleDone, initSocket} from './SocketManager';
 import * as TodosStateFunctions from "./TodosStateFunctions";
-import {Todo, TodoData} from "../interfaces/todo-item.interface";
+import {Todo, TodoData} from "../../../shared/todo-item.interface.ts";
 import { getMUITheme } from "./theme";
 
 function App() {
@@ -95,14 +95,14 @@ function App() {
         }
 
         getTasksFromDB(email)
-            .then((res) => {
-                const tasksMap = tasksArrayToMap(res.data);
+            .then((tasks) => {
+                const tasksMap = tasksArrayToMap(tasks);
                 setTodos(tasksMap);
             })
-            .catch(() => {
-                setAlertMessage("Could not load tasks from server");
+            .catch((error) => {
+                setAlertMessage(error.message);
             });
-    }, [email]); //run when user connects
+    }, [email]); //run when user logs in
 
     useEffect(() => {
         if (!email) {
@@ -134,7 +134,7 @@ function App() {
         TodosStateFunctions.toggleDone(setTodos, taskID);
     };
 
-    const addTodo = (todo: string) => {
+    const addTodo = async (todo: string) => {
         if (todo === "") {
             return;
         }
@@ -145,21 +145,20 @@ function App() {
 
         const newTodo = {...newTodoData, id: taskID};
 
-        addTaskToDB(newTodo)
-            .then(() => {
-                const {id, ...taskData} = newTodo;
-                emitAddTask({id, taskData});
-            })
-            .catch((error) => {
-                console.error("Error adding task to db: ", error);
-                setAlertMessage("Failed to upload new task to server");
+        try{
+            await addTaskToDB(newTodo);
+            const {id, ...taskData} = newTodo;
+            emitAddTask({id, taskData});
+        }catch(error){
+            console.error("Error adding task to db: ", error);
+            setAlertMessage("Failed to upload new task to server");
 
-                //delete task that failed to upload to database
-                deleteTodoFromState(taskID);
-            });
+            //delete task that failed to upload to database
+            deleteTodoFromState(taskID);
+        }
     };
 
-    const deleteTodo = (taskID: string) => {
+    const deleteTodo = async (taskID: string) => {
         const todoDataBackup = todos.get(taskID);
         if(!todoDataBackup) {
             //task doesn't exist
@@ -167,19 +166,18 @@ function App() {
         }
         deleteTodoFromState(taskID);
 
-        deleteTaskFromDB(taskID)
-            .then(() => {
-                emitRemoveTask({id: taskID});
-            })
-            .catch(() => {
-                setAlertMessage("Failed to delete task on server");
+        try{
+            await deleteTaskFromDB(taskID);
+            emitRemoveTask(taskID);
+        }catch (error) {
+            setAlertMessage("Failed to delete task on server");
 
-                //restore task
-                addTodoToState(taskID, todoDataBackup);
-            });
+            //restore task
+            addTodoToState(taskID, todoDataBackup);
+        }
     };
 
-    const editContent = (taskID: string, updatedContent: string) => {
+    const editContent = async (taskID: string, updatedContent: string) => {
         const contentBackup = todos.get(taskID)?.content;
         if(!contentBackup) {
             return;
@@ -187,20 +185,19 @@ function App() {
 
         editTodoOnState(taskID, updatedContent);
 
-        editTaskOnDB({id: taskID}, {content: updatedContent})
-            .then(() => {
-                emitEditTask({id: taskID,
-                    newContent: updatedContent});
-            })
-            .catch(() => {
-                setAlertMessage("Failed to update task on server");
+        try{
+            await editTaskOnDB(taskID, {content: updatedContent});
+            emitEditTask({id: taskID,
+                newContent: updatedContent});
+        }catch(error){
+            setAlertMessage("Failed to update task on server");
 
-                //restore previous content of task
-                editTodoOnState(taskID, contentBackup);
-            });
+            //restore previous content of task
+            editTodoOnState(taskID, contentBackup);
+        }
     };
 
-    const toggleDone = (taskID: string) => {
+    const toggleDone = async (taskID: string) => {
         const task = todos.get(taskID);
         if(!task){
             return;
@@ -210,16 +207,15 @@ function App() {
 
         toggleDoneOnState(taskID);
 
-        editTaskOnDB({id: taskID}, {done: !doneValue})
-            .then(() => {
-                emitToggleDone({id: taskID, done: !doneValue});
-            })
-            .catch(() => {
-                setAlertMessage("Failed to update task on server");
+        try{
+            await editTaskOnDB(taskID, {done: !doneValue});
+            emitToggleDone({id: taskID, done: !doneValue});
+        }catch(error){
+            setAlertMessage("Failed to update task on server");
 
-                //restore old done value
-                toggleDoneOnState(taskID);
-            });
+            //restore old done value
+            toggleDoneOnState(taskID);
+        }
     };
 
     const logOut = () => {
@@ -227,14 +223,13 @@ function App() {
         setEmail("");
     };
 
-    const deleteAccount = () => {
-        deleteUserFromDB()
-            .then(() => {
-                logOut();
-            })
-            .catch(() => {
-                setAlertMessage("Failed to delete account");
-            });
+    const deleteAccount = async () => {
+        try{
+            await deleteUserFromDB();
+            logOut();
+        }catch(error){
+            setAlertMessage("Failed to delete account");
+        }
     };
 
     return (

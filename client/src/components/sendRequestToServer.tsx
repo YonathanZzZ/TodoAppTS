@@ -1,7 +1,6 @@
 import axios from 'axios';
 import Cookies from "js-cookie";
-import {Todo} from "../interfaces/todo-item.interface.ts";
-console.log('PORT env var: ', import.meta.env.PORT);
+import {Todo} from "../../../shared/todo-item.interface.ts";
 const serverURL = import.meta.env.DEV ? `http://localhost:8080` : '';
 
 const axiosInstance = axios.create({
@@ -42,47 +41,76 @@ export const setAuthErrorHandler = (handler: () => void) => {
     authErrorHandler = handler;
 };
 
-export const getTasksFromDB = (email: string) => {
-    return axiosInstance.get(`${serverURL}/tasks/${email}`);
+export const getTasksFromDB = async (email: string) => {
+    try {
+        const res = await axiosInstance.get(`${serverURL}/tasks/${email}`);
+        const tasks: Todo[] = res.data;
+        return tasks;
+    } catch (error) {
+        throw new Error("Failed to get tasks from server");
+    }
 };
 
-export const addTaskToDB = (task: Todo) => {
-    console.log('task object: ', task);
-    return axiosInstance.post(`${serverURL}/tasks`, task);
+export const addTaskToDB = async (task: Todo) => {
+    const data = {task: task};
+    try{
+         await axiosInstance.post(`${serverURL}/tasks`, data);
+    }catch(error){
+        throw new Error("Failed to add task to server");
+    }
 };
 
-export const deleteTaskFromDB = (taskID: string) => {
+export const deleteTaskFromDB = async (taskID: string) => {
+    try{
+        await axiosInstance.delete(`${serverURL}/tasks/${taskID}`);
 
-    return axiosInstance.delete(`${serverURL}/tasks/${taskID}`);
+    }catch (error) {
+        throw new Error("Failed to delete task from server");
+    }
 };
 
-export const editTaskOnDB = (identifier: any, newData: any) => {
-
-    //TODO instead of this generic edit function (that can edit any task in any manner), create separate functions for
-    // changing task content, and for changing the 'done' value . this creates loose coupling instead of the
-    // current tight coupling where the client must know how task data is stored in the database
-
-    return axiosInstance.patch(`${serverURL}/tasks`, {
-        taskIdentifier: identifier, newTaskData: newData
-    });
+export const editTaskOnDB = async (taskID: string, updateData: any) => {
+    try{
+        await axiosInstance.patch(`${serverURL}/tasks`, {
+            id: taskID, updateData: updateData
+        });
+    }catch(error) {
+        throw new Error("Failed to edit task on server");
+    }
 };
 
-export const addUser = (email: string, password: string) => {
-    return axiosInstance.post(`${serverURL}/register`, {
-        email: email,
-        password: password
-    });
+export const addUser = async (email: string, password: string) => {
+    try{
+        await axiosInstance.post(`${serverURL}/register`, {
+            email: email,
+            password: password
+        });
+    }catch(error){
+        //TODO: handle possible errors: user already exists (requires changes on server side)
+        throw new Error("Failed to register user");
+    }
 };
 
-export const validateUser = (email: string, password: string) => {
-    return axiosInstance.post(`${serverURL}/login`, {
-        email: email,
-        password: password
-    });
+export const getAccessToken = async (email: string, password: string) => {
+    try{
+        const res = await axiosInstance.post(`${serverURL}/login`, {
+            email: email,
+            password: password
+        });
+
+        return res.data.accessToken;
+    }catch(error){
+        //TODO: handle possible errors: user does not exist or wrong password (requires changes on server side)
+        throw new Error("Failed to validate user");
+    }
 };
 
-export const deleteUserFromDB = () => {
-    return axiosInstance.delete(`${serverURL}/users`);
+export const deleteUserFromDB = async () => {
+    try{
+        await axiosInstance.delete(`${serverURL}/users`);
+    }catch(error){
+        throw new Error("Failed to delete user from server");
+    }
 };
 
 

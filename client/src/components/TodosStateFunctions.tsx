@@ -1,4 +1,4 @@
-import {TodoData} from "../interfaces/todo-item.interface.ts";
+import {TodoData} from "../../../shared/todo-item.interface.ts";
 import {Dispatch, SetStateAction} from "react";
 
 export const addTodo = (setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>, taskID: string, taskData: TodoData) => {

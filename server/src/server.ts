@@ -1,19 +1,19 @@
-require('dotenv').config(); //load environment variables defined in .env file
-const express = require('express');
+import dotenv from 'dotenv';
+dotenv.config(); //load environment variables defined in .env file
+import express from 'express';
 const app = express();
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcrypt';
 const PORT = process.env.PORT || 8080;
 const saltRounds = 10;
-const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
-const auth = require('./auth');
-const dbHandler = require('./dbHandler');
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const initializeSocket = require('./socketHandler');
+import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
+import { authenticateToken } from './auth';
+import {addTaskToDB, addUser, getUserPassword, deleteUser, deleteTask, updateTask, getUserTasks} from './dbHandler';
+import http from 'http';
+import path from 'path';
+import {initializeSocket} from './socketHandler';
 const httpServer = http.createServer(app);
-const cors = require('cors');
+import cors from 'cors';
 const BUILD_PATH = "../client/build/";
 
 app.use(express.json());
@@ -28,10 +28,12 @@ if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development'){
     }));
 }
 
-app.post('/tasks', auth.authenticateToken, (req, res) => {
-    const task = req.body;
+app.post('/tasks', authenticateToken, (req, res) => {
+    // const task = req.body;
+    const task = req.body.task;
+    const email = req.body.user.email;
 
-    dbHandler.addTaskToDB(task).then(() => {
+    addTaskToDB(task, email).then(() => {
         console.log('task successfully added to db');
         res.status(200).json('task added');
     }).catch((error) => {
@@ -40,11 +42,11 @@ app.post('/tasks', auth.authenticateToken, (req, res) => {
     });
 });
 
-app.delete('/tasks/:id', auth.authenticateToken, (req, res) => {
+app.delete('/tasks/:id', authenticateToken, (req, res) => {
 
     const taskID = req.params.id;
 
-    dbHandler.deleteTask(taskID).then(() => {
+    deleteTask(taskID).then(() => {
         console.log('task successfully removed from db');
         res.status(200).json('task removed');
     }).catch((error) => {
@@ -53,12 +55,12 @@ app.delete('/tasks/:id', auth.authenticateToken, (req, res) => {
     });
 });
 
-app.patch('/tasks', auth.authenticateToken, (req, res) => {
+app.patch('/tasks', authenticateToken, (req, res) => {
 
-    const identifier = req.body.taskIdentifier;
-    const newTaskData = req.body.newTaskData;
+    const taskID = req.body.id;
+    const updateData = req.body.updateData;
 
-    dbHandler.updateTaskGeneric(identifier, newTaskData).then(() => {
+    updateTask(taskID, updateData).then(() => {
         console.log('task successfully updated on db');
         res.status(200).json('task updated');
     }).catch((error) => {
@@ -67,10 +69,10 @@ app.patch('/tasks', auth.authenticateToken, (req, res) => {
     })
 });
 
-app.get('/tasks/:email', auth.authenticateToken, (req, res) => {
+app.get('/tasks/:email', authenticateToken, (req, res) => {
     const email = req.params.email;
-
-    dbHandler.getUserTasks(email).then((tasks) => {
+    //TODO modify this route. the email can be extract from the token (req.body.user.email) so the route shouldn't include the email
+    getUserTasks(email).then((tasks) => {
         console.log('successfully retrieved tasks');
         res.status(200).json(tasks);
     }).catch((error) => {
@@ -83,8 +85,8 @@ app.post('/register', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    bcrypt.hash(password, saltRounds, (err, hashedPassword) => {
-        dbHandler.addUser(email, hashedPassword).then(() => {
+    bcrypt.hash(password, saltRounds, (_err, hashedPassword) => {
+        addUser(email, hashedPassword).then(() => {
             console.log('added user to DB');
             res.status(200).json('user added');
         }).catch((error) => {
@@ -94,11 +96,15 @@ app.post('/register', async (req, res) => {
     });
 });
 
-app.delete('/users', auth.authenticateToken, (req, res) => {
-    const emailToDelete = req.body.email;
+app.delete('/users', authenticateToken, (req, res) => {
+    const emailToDelete = req.body.user.email;
 
-    //delete user and their tasks from db
-    dbHandler.deleteUser(emailToDelete).then(() => {
+    if (!emailToDelete) {
+        res.status(400).json('invalid request');
+        return;
+    }
+
+    deleteUser(emailToDelete).then(() => {
         console.log('deleted user: ', emailToDelete);
         res.status(200).json('user deleted');
     }).catch((error) => {
@@ -111,7 +117,7 @@ app.post('/login', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    const hashedPassword = await dbHandler.getUserPassword(email);
+    const hashedPassword = await getUserPassword(email);
     if (!hashedPassword) {
         res.status(401).json('Invalid credentials');
         return;
@@ -119,7 +125,12 @@ app.post('/login', async (req, res) => {
 
     const passwordMatch = await bcrypt.compare(password, hashedPassword);
     if (passwordMatch) {
-        const token = jwt.sign({email: email}, process.env.JWT_SECRET_KEY, {expiresIn: '7d'});
+        const secretKey = process.env.JWT_SECRET_KEY;
+        if(!secretKey){
+            res.status(500).json('Internal server error');
+            return;
+        }
+        const token = jwt.sign({email: email}, secretKey, {expiresIn: '7d'});
 
         res.json({
             accessToken: token,
@@ -130,7 +141,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get("*", (req, res) => {
+app.get("*", (_req, res) => {
     res.sendFile(path.join(__dirname, BUILD_PATH + "index.html"));
 })
 

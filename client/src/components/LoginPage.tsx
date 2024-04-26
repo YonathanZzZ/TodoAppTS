@@ -2,7 +2,7 @@ import Stack from "@mui/material/Stack";
 import {Box, TextField} from "@mui/material";
 import React, {Dispatch, SetStateAction, useState} from "react";
 import Button from "@mui/material/Button";
-import {addUser, validateUser} from "./sendRequestToServer";
+import {addUser, getAccessToken} from "./sendRequestToServer";
 import Cookies from 'js-cookie';
 import isEmail from 'validator/lib/isEmail';
 
@@ -16,12 +16,11 @@ export const LoginPage = ({setEmail}: LoginPageProps) => {
     const [passwordInput, setPasswordInput] = useState("");
     const [inputError, setInputError] = useState("");
 
-    const loginUser = () => {
-        validateUser(emailInput, passwordInput).then((res) => {
-            const token = res.data.accessToken;
+    const loginUser = async () => {
+        try{
+            const token = await getAccessToken(emailInput, passwordInput);
             if (!token) {
-                console.error('failed to extract token from server response');
-                return;
+                throw new Error("Failed to get token from server");
             }
 
             Cookies.set('token', token, {
@@ -32,15 +31,19 @@ export const LoginPage = ({setEmail}: LoginPageProps) => {
             setEmail(emailInput);
             setPasswordInput("");
 
-        }).catch((error) => {
-            console.error('user unauthorized: ', error);
-        });
+        }catch(error){
+            throw new Error("Failed to login user");
+        }
     }
-    const handleLoginButton = () => {
-        loginUser();
+    const handleLoginButton = async () => {
+        try{
+            await loginUser();
+        }catch(error){
+            //TODO display error message to user using DisplayAlert component
+        }
     };
 
-    const handleRegisterButton = () => {
+    const handleRegisterButton = async () => {
         if (!isEmail(emailInput)) {
             setInputError('Invalid email address');
             return;
@@ -48,16 +51,23 @@ export const LoginPage = ({setEmail}: LoginPageProps) => {
             setInputError("");
         }
 
-        addUser(emailInput, passwordInput).then(() => {
-            loginUser();
-        }).catch((error) => {
-            console.error('failed to register user: ', error);
-        });
+        try{
+            await addUser(emailInput, passwordInput);
+            await loginUser();
+        }catch(error){
+            //TODO display error message to user using DisplayAlert component
+        }
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.code === "Enter") {
-            handleLoginButton();
+    const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.code !== "Enter") {
+            return;
+        }
+
+        try{
+            await handleLoginButton();
+        }catch(error){
+            console.error("Failed to login user: ", error);
         }
     };
 

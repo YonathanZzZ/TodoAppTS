@@ -1,13 +1,13 @@
 import io, { Socket } from 'socket.io-client';
 import * as TodosStateFunctions from './TodosStateFunctions';
-import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Dispatch, SetStateAction } from 'react';
-import {TodoData} from '../interfaces/todo-item.interface';
-let socket: Socket<DefaultEventsMap, DefaultEventsMap> | null = null;
+import {TodoData} from '../../../shared/todo-item.interface.ts';
+import {SocketEvents} from "../../../shared/socket-io.interface.ts";
+let socket: Socket<SocketEvents, SocketEvents> | null = null;
 
 interface EventData {
     addTask: {id: string, taskData: TodoData};
-    removeTask: {id: string};
+    deleteTask: string;
     editTask: {id: string, newContent: string};
     changeTaskDone: {id: string, done: boolean};
 }
@@ -32,8 +32,8 @@ const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStat
         TodosStateFunctions.addTodo(setTodos, taskID, taskData);
     };
 
-    const onTaskRemoved = (data: {id: string}) => {
-        TodosStateFunctions.deleteTodo(setTodos, data.id);
+    const onTaskRemoved = (taskID: string) => {
+        TodosStateFunctions.deleteTodo(setTodos, taskID);
     };
 
     const onTaskEdited = (data: {id: string, newContent: string}) => {
@@ -53,7 +53,7 @@ const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStat
     socket.on("addTask", onTaskAdded);
     socket.on("deleteTask", onTaskRemoved);
     socket.on("editTask", onTaskEdited);
-    socket.on("toggleDone", onChangeTaskDone);
+    socket.on("changeTaskDone", onChangeTaskDone);
 
     socket.connect();
 }
@@ -66,7 +66,7 @@ const emitAddTask = (data: EventData["addTask"]) => {
     socket.emit("addTask", data);
 }
 
-const emitRemoveTask = (data: EventData["removeTask"]) => {
+const emitRemoveTask = (data: EventData["deleteTask"]) => {
     if(!socket){
         return;
     }
@@ -87,7 +87,7 @@ const emitToggleDone = (data: EventData["changeTaskDone"]) => {
         return;
     }
 
-    socket.emit("toggleDone", data);
+    socket.emit("changeTaskDone", data);
 }
 
 export {initSocket, emitAddTask, emitRemoveTask, emitEditTask, emitToggleDone};
