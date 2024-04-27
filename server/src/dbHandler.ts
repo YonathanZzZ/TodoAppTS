@@ -13,7 +13,7 @@ const getEnv = (key: string): string => {
     return value;
 }
 
-interface UserAttributes{
+interface UserAttributes {
     email: string;
     password: string;
 }
@@ -30,7 +30,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> {
     }
 }
 
-interface TaskAttributes extends Todo{
+interface TaskAttributes extends Todo {
     email: string;
 }
 
@@ -58,12 +58,12 @@ const sequelize = new Sequelize(
     },
 );
 
-interface UserInstance extends Model<UserAttributes, UserCreationAttributes>{
+interface UserInstance extends Model<UserAttributes, UserCreationAttributes> {
     Tasks: Task[];
 }
 
 sequelize.authenticate().then(() => {
-    // console.log('connection to database successfully established');
+    console.log('connection to database successfully established');
 }).catch((error) => {
     console.error('Unable to connect to database, error: ', error);
 });
@@ -139,11 +139,11 @@ export const deleteTask = (taskID: string) => {
     });
 };
 
-interface ContentUpdate{
+interface ContentUpdate {
     content: string;
 }
 
-interface DoneUpdate{
+interface DoneUpdate {
     done: boolean;
 }
 
@@ -158,23 +158,25 @@ export const updateTask = (taskID: string, taskUpdate: TaskUpdate) => {
 };
 
 export const getUserTasks = async (email: string) => {
-    try{
-    const user = await User.findOne({where: {
-                    email: email
-                },
-                include: {
-                    model: Task,
-                    attributes: ['id', 'content', 'done']
-                }}) as UserInstance | null;
+    try {
+        const user = await User.findOne({
+            where: {
+                email: email
+            },
+            include: {
+                model: Task,
+                attributes: ['id', 'content', 'done']
+            }
+        }) as UserInstance | null;
 
-    if(!user){
-        throw new Error('user not found');
-    }
+        if (!user) {
+            throw new Error('user not found');
+        }
 
-    return user.Tasks.map((task: Task) => task.get({plain: true}));
+        return user.Tasks.map((task: Task) => task.get({plain: true}));
 
-    }catch(error){
-    throw error;
+    } catch (error) {
+        throw error;
     }
 };
 

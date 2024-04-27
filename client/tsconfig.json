@@ -6,10 +6,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "types": ["vite/client"],
-    "baseUrl": "./",
-    "paths": {
-      "@shared/*": ["shared/*"]
-    },
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

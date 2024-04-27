@@ -41,9 +41,9 @@ export const setAuthErrorHandler = (handler: () => void) => {
     authErrorHandler = handler;
 };
 
-export const getTasksFromDB = async (email: string) => {
+export const getTasksFromDB = async () => {
     try {
-        const res = await axiosInstance.get(`${serverURL}/tasks/${email}`);
+        const res = await axiosInstance.get(`${serverURL}/tasks`);
         const tasks: Todo[] = res.data;
         return tasks;
     } catch (error) {

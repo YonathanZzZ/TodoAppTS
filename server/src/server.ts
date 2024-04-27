@@ -31,7 +31,13 @@ if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development'){
 app.post('/tasks', authenticateToken, (req, res) => {
     // const task = req.body;
     const task = req.body.task;
-    const email = req.body.user.email;
+    const email = req.user?.email;
+
+    if(!email){
+        console.error('request missing user property');
+        res.status(500).json('internal server error');
+        return;
+    }
 
     addTaskToDB(task, email).then(() => {
         console.log('task successfully added to db');
@@ -69,34 +75,45 @@ app.patch('/tasks', authenticateToken, (req, res) => {
     })
 });
 
-app.get('/tasks/:email', authenticateToken, (req, res) => {
-    const email = req.params.email;
-    //TODO modify this route. the email can be extract from the token (req.body.user.email) so the route shouldn't include the email
-    getUserTasks(email).then((tasks) => {
-        console.log('successfully retrieved tasks');
-        res.status(200).json(tasks);
-    }).catch((error) => {
+app.get('/tasks', authenticateToken, async (req, res) => {
+    const email = req.user?.email; // user was set by the auth middleware
+
+    if(!email){
+        console.error('request missing user property');
+        res.status(500).json('internal server error');
+        return;
+    }
+
+    try{
+        const tasks = await getUserTasks(email);
+        res.json(tasks);
+    }catch(error){
         console.error('failed to retrieve user tasks: ', error);
         res.status(500).json('internal server error');
-    });
+    }
 });
 
 app.post('/register', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    bcrypt.hash(password, saltRounds, (_err, hashedPassword) => {
-        addUser(email, hashedPassword).then(() => {
-            console.log('added user to DB');
+    bcrypt.hash(password, saltRounds, async (_err, hashedPassword) => {
+
+        if (!email || !hashedPassword) {
+            res.status(400).json('invalid request');
+            return;
+        }
+        try{
+            await addUser(email, hashedPassword);
             res.status(200).json('user added');
-        }).catch((error) => {
+        }catch(error){
             console.error('failed to add user to DB: ', error);
             res.status(500).json('failed to add user');
-        });
+        }
     });
 });
 
-app.delete('/users', authenticateToken, (req, res) => {
+app.delete('/users', authenticateToken, async (req, res) => {
     const emailToDelete = req.body.user.email;
 
     if (!emailToDelete) {
@@ -104,18 +121,17 @@ app.delete('/users', authenticateToken, (req, res) => {
         return;
     }
 
-    deleteUser(emailToDelete).then(() => {
-        console.log('deleted user: ', emailToDelete);
-        res.status(200).json('user deleted');
-    }).catch((error) => {
+    try{
+        await deleteUser(emailToDelete);
+        res.json('user deleted');
+    }catch(error){
         console.error('failed to delete user: ', error);
         res.status(500).json('failed to delete user');
-    });
+    }
 });
 
 app.post('/login', async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+    const {email, password} = req.body;
 
     const hashedPassword = await getUserPassword(email);
     if (!hashedPassword) {
@@ -124,21 +140,22 @@ app.post('/login', async (req, res) => {
     }
 
     const passwordMatch = await bcrypt.compare(password, hashedPassword);
-    if (passwordMatch) {
-        const secretKey = process.env.JWT_SECRET_KEY;
-        if(!secretKey){
-            res.status(500).json('Internal server error');
-            return;
-        }
-        const token = jwt.sign({email: email}, secretKey, {expiresIn: '7d'});
-
-        res.json({
-            accessToken: token,
-
-        });
-    } else {
+    if(!passwordMatch){
         res.status(401).json('Invalid credentials');
+        return;
     }
+
+    const secretKey = process.env.JWT_SECRET_KEY;
+    if(!secretKey){
+        res.status(500).json('Internal server error');
+        return;
+    }
+
+    const token = jwt.sign({email: email}, secretKey, {expiresIn: '7d'});
+
+    res.json({
+        accessToken: token,
+    });
 });
 
 app.get("*", (_req, res) => {

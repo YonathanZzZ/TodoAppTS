@@ -94,7 +94,7 @@ function App() {
             return;
         }
 
-        getTasksFromDB(email)
+        getTasksFromDB()
             .then((tasks) => {
                 const tasksMap = tasksArrayToMap(tasks);
                 setTodos(tasksMap);
