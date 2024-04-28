@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 8080;
 const saltRounds = 10;
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
-import { authenticateToken } from './auth';
+import { authenticateToken } from './middleware/auth';
 import {addTaskToDB, addUser, getUserPassword, deleteUser, deleteTask, updateTask, getUserTasks} from './dbHandler';
 import http from 'http';
 import path from 'path';
@@ -28,10 +28,11 @@ if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development'){
     }));
 }
 
-app.post('/tasks', authenticateToken, (req, res) => {
-    // const task = req.body;
+app.post('/tasks', authenticateToken, async (req, res) => {
     const task = req.body.task;
     const email = req.user?.email;
+
+    //TODO: check if task is valid (not null and of type Todo)
 
     if(!email){
         console.error('request missing user property');
@@ -39,40 +40,42 @@ app.post('/tasks', authenticateToken, (req, res) => {
         return;
     }
 
-    addTaskToDB(task, email).then(() => {
+    try{
+        await addTaskToDB(task, email);
         console.log('task successfully added to db');
         res.status(200).json('task added');
-    }).catch((error) => {
+    }catch(error){
         console.error('failed to add task to db: ', error);
         res.status(500).json('internal server error');
-    });
+    }
 });
 
-app.delete('/tasks/:id', authenticateToken, (req, res) => {
-
+app.delete('/tasks/:id', authenticateToken, async (req, res) => {
     const taskID = req.params.id;
 
-    deleteTask(taskID).then(() => {
+    try{
+        await deleteTask(taskID);
         console.log('task successfully removed from db');
         res.status(200).json('task removed');
-    }).catch((error) => {
+    }catch(error){
         console.error('failed to remove task from db: ', error);
         res.status(500).json('internal server error');
-    });
+    }
 });
 
-app.patch('/tasks', authenticateToken, (req, res) => {
+app.patch('/tasks', authenticateToken, async (req, res) => {
 
     const taskID = req.body.id;
     const updateData = req.body.updateData;
 
-    updateTask(taskID, updateData).then(() => {
+    try{
+        await updateTask(taskID, updateData);
         console.log('task successfully updated on db');
         res.status(200).json('task updated');
-    }).catch((error) => {
+    }catch(error){
         console.error('failed to update task on db', error);
-        res.status(500).json('internal server error')
-    })
+        res.status(500).json('internal server error');
+    }
 });
 
 app.get('/tasks', authenticateToken, async (req, res) => {

@@ -1,6 +1,6 @@
 import jwt, {JwtPayload} from 'jsonwebtoken';
 import {NextFunction, Request, Response} from "express";
-import {User} from "../interfaces/user.interface";
+import {User} from "../../interfaces/user.interface";
 
 const secretKey = process.env.JWT_SECRET_KEY;
 if (!secretKey) {
