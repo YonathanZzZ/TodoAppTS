@@ -15,6 +15,7 @@ import {initializeSocket} from './socketHandler';
 const httpServer = http.createServer(app);
 import cors from 'cors';
 const BUILD_PATH = "../client/build/";
+import {registrationMiddleware} from "./middleware/registration-validation";
 
 app.use(express.json());
 app.use(cookieParser());
@@ -96,16 +97,10 @@ app.get('/tasks', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/register', async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+app.post('/register', registrationMiddleware, async (req, res) => {
+    const {email, password} = req.body;
 
     bcrypt.hash(password, saltRounds, async (_err, hashedPassword) => {
-
-        if (!email || !hashedPassword) {
-            res.status(400).json('invalid request');
-            return;
-        }
         try{
             await addUser(email, hashedPassword);
             res.status(200).json('user added');

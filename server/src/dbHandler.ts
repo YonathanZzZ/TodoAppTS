@@ -1,7 +1,6 @@
-import {Sequelize, Table} from "sequelize-typescript";
+import {Model, Sequelize, Table} from "sequelize-typescript";
 import {DataTypes, Optional} from "sequelize";
 import {Todo} from "../../shared/todo-item.interface";
-import {Model} from 'sequelize-typescript';
 
 const HASH_LENGTH = 60;
 
@@ -203,4 +202,14 @@ export const getUserPassword = async (email: string) => {
     }
 
     return user.password;
+}
+
+export const isUserRegistered = async (email: string) => {
+    try{
+        const user = await User.findOne({where: {email: email}});
+        return !!user;
+    }catch(error){
+        console.error('failed to check if user is registered: ', error);
+        return false;
+    }
 }
