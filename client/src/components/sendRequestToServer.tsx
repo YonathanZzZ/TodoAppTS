@@ -80,29 +80,19 @@ export const editTaskOnDB = async (taskID: string, updateData: any) => {
 };
 
 export const addUser = async (email: string, password: string) => {
-    try{
         await axiosInstance.post(`${serverURL}/register`, {
             email: email,
             password: password
         });
-    }catch(error){
-        //TODO: handle possible errors: user already exists (requires changes on server side)
-        throw new Error("Failed to register user");
-    }
 };
 
 export const getAccessToken = async (email: string, password: string) => {
-    try{
         const res = await axiosInstance.post(`${serverURL}/login`, {
             email: email,
             password: password
         });
 
         return res.data.accessToken;
-    }catch(error){
-        //TODO: handle possible errors: user does not exist or wrong password (requires changes on server side)
-        throw new Error("Failed to validate user");
-    }
 };
 
 export const deleteUserFromDB = async () => {

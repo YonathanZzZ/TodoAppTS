@@ -6,6 +6,7 @@ import {addUser, getAccessToken} from "./sendRequestToServer";
 import Cookies from 'js-cookie';
 import isEmail from 'validator/lib/isEmail';
 import DisplayAlert from "./DisplayAlert.tsx";
+import axios, {AxiosError} from "axios";
 
 interface LoginPageProps {
     setIsLoggedIn: Dispatch<SetStateAction<boolean>>
@@ -39,7 +40,7 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
             isValid = false;
         }
 
-        if(!isPasswordValid(passwordInput)){
+        if (!isPasswordValid(passwordInput)) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 password: "Password must be at least 8 characters long and contain at least 1 digit and 1 lowercase and uppercase letters",
@@ -55,12 +56,44 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
         setInputErrors({email: "", password: ""});
     }
 
-    const loginUser = async () => {
-        try{
-            const token = await getAccessToken(emailInput, passwordInput);
-            if (!token) {
-                throw new Error("Failed to get token from server");
+    interface StatusCodeMessages {
+        [key: number]: string;
+    }
+
+    const statusCodeMessages: StatusCodeMessages = {
+        400: "Invalid email address or weak password",
+        401: "Invalid credentials",
+        409: "An account with this email address already exists",
+        500: "Internal server error",
+    };
+
+    const extractStatusCode = (error: Error | AxiosError) => {
+        if (axios.isAxiosError(error) && error.response) {
+            return error.response.status;
+        }
+
+        return null;
+    }
+
+    const getAlertMessage = (error: any) => {
+        let resMessage: string;
+        const statusCode = extractStatusCode(error);
+        if (!statusCode) {
+            resMessage = "Unknown error while trying to log-in";
+        } else {
+            const message = statusCodeMessages[statusCode];
+            if (!message) {
+                resMessage = "Unknown error while trying to log-in";
+            } else {
+                resMessage = message;
             }
+        }
+        return resMessage;
+    }
+
+    const loginUser = async () => {
+        try {
+            const token = await getAccessToken(emailInput, passwordInput);
 
             Cookies.set('token', token, {
                 sameSite: 'strict',
@@ -68,16 +101,15 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
             });
 
             setIsLoggedIn(true);
-        }catch(error){
-            console.error('Failed to login user: ', error);
-            setAlertMessage('Failed to login user');
+        } catch (error) {
+            setAlertMessage(getAlertMessage(error));
         }
     }
 
     const areLoginFieldsValid = () => {
         let valid = true;
 
-        if(!passwordInput){
+        if (!passwordInput) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 password: "Password cannot be empty",
@@ -86,14 +118,14 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
             valid = false;
         }
 
-        if(!emailInput){
+        if (!emailInput) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 email: "Email cannot be empty",
             }));
 
             valid = false;
-        }else if (!isEmail(emailInput)){
+        } else if (!isEmail(emailInput)) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 email: "Invalid email",
@@ -108,7 +140,7 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
     const handleLoginButton = async () => {
         resetErrors();
 
-        if(!areLoginFieldsValid()){
+        if (!areLoginFieldsValid()) {
             return;
         }
 
@@ -118,17 +150,15 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
     const handleRegisterButton = async () => {
         resetErrors();
 
-        if(!areRegisterFieldsValid()){
+        if (!areRegisterFieldsValid()) {
             return;
         }
 
-        try{
+        try {
             await addUser(emailInput, passwordInput);
             await loginUser();
-        }catch(error){
-            //TODO display error message to user using DisplayAlert component
-            console.error('Failed to register user: ', error);
-            setAlertMessage('Failed to register user.');
+        } catch (error: any) {
+            setAlertMessage(getAlertMessage(error));
         }
     }
 
@@ -137,9 +167,9 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
             return;
         }
 
-        try{
+        try {
             await handleLoginButton();
-        }catch(error){
+        } catch (error) {
             console.error("Failed to login user: ", error);
         }
     };
@@ -194,4 +224,3 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
         </Stack>
     );
 }
-
