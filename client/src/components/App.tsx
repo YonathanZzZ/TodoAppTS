@@ -13,7 +13,6 @@ import {
 } from "./sendRequestToServer";
 import {LoginPage} from "./LoginPage";
 import Cookies from "js-cookie";
-import {jwtDecode} from "jwt-decode";
 import {AccountMenu} from "./AccountMenu";
 import {v4 as uuidv4} from "uuid";
 import {ThemeToggle} from "./ThemeToggle";
@@ -22,11 +21,12 @@ import {emitAddTask, emitEditTask, emitRemoveTask, emitToggleDone, initSocket} f
 import * as TodosStateFunctions from "./TodosStateFunctions";
 import {Todo, TodoData} from "../../../shared/todo-item.interface.ts";
 import { getMUITheme } from "./theme";
+import {jwtDecode} from 'jwt-decode';
 
 function App() {
     const [todos, setTodos] = useState(new Map<string, TodoData>());
     const [alertMessage, setAlertMessage] = useState("");
-    const [email, setEmail] = useState("");
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const serverURL = import.meta.env.DEV
         ? "http://localhost:8080"
         : window.location.origin;
@@ -38,7 +38,7 @@ function App() {
         setAuthErrorHandler(
             () => {
                 //execute when token authentication fails (no token or expired token)
-                setEmail("");
+                setIsLoggedIn(false);
             }
         );
     }, []);
@@ -73,11 +73,7 @@ function App() {
             return;
         }
 
-        const decodedToken = jwtDecode<Token>(token);
-        const emailFromToken = decodedToken.email;
-
-        setEmail(emailFromToken);
-
+        setIsLoggedIn(true);
     }, []);
 
     const tasksArrayToMap = (tasks: Todo[]) => {
@@ -90,7 +86,7 @@ function App() {
     }
 
     useEffect(() => {
-        if (!email) {
+        if (!isLoggedIn) {
             return;
         }
 
@@ -102,15 +98,29 @@ function App() {
             .catch((error) => {
                 setAlertMessage(error.message);
             });
-    }, [email]); //run when user logs in
+    }, [isLoggedIn]); //run when user logs in
+
+    const extractEmailFromToken = () => {
+        const token = Cookies.get('token');
+        if(!token){
+            return null;
+        }
+        const decodedToken = jwtDecode<Token>(token);
+        return decodedToken.email;
+    }
 
     useEffect(() => {
-        if (!email) {
+        if (!isLoggedIn) {
+            return;
+        }
+
+        const email = extractEmailFromToken();
+        if(!email){
             return;
         }
 
         initSocket(email, serverURL, setTodos);
-    }, [email]);
+    }, [isLoggedIn]);
 
     const closeAlert = () => {
         setAlertMessage("");
@@ -220,7 +230,7 @@ function App() {
 
     const logOut = () => {
         Cookies.remove("token");
-        setEmail("");
+        setIsLoggedIn(false);
     };
 
     const deleteAccount = async () => {
@@ -244,7 +254,7 @@ function App() {
                 alignItems: "center"
             }}>
                 <Paper elevation={5} sx={{width: "100%", maxWidth: "sm", height: "100vh", overflow: "auto"}}>
-                    {email ? (
+                    {isLoggedIn ? (
                         <>
                             <AppBar position="sticky">
                                 <Toolbar>
@@ -286,7 +296,7 @@ function App() {
                         </>
                     ) : (
                         <>
-                            <LoginPage setEmail={setEmail}/>
+                            <LoginPage setIsLoggedIn={setIsLoggedIn}/>
                         </>
                     )}
                 </Paper>
