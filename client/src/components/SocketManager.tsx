@@ -29,25 +29,25 @@ const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStat
         const taskID = newTask.id;
         const taskData = newTask.taskData;
 
-        TodosStateFunctions.addTodo(setTodos, taskID, taskData);
+        TodosStateFunctions.addTodoToState(setTodos, taskID, taskData);
     };
 
     const onTaskRemoved = (taskID: string) => {
-        TodosStateFunctions.deleteTodo(setTodos, taskID);
+        TodosStateFunctions.deleteTodoFromState(setTodos, taskID);
     };
 
     const onTaskEdited = (data: {id: string, newContent: string}) => {
         const taskID = data.id;
         const newContent = data.newContent;
 
-        TodosStateFunctions.editTodo(setTodos, taskID, newContent);
+        TodosStateFunctions.editTodoInState(setTodos, taskID, newContent);
     };
 
     const onChangeTaskDone = (data: {id: string, done: boolean}) => {
         const taskID = data.id;
         const newDoneValue = data.done;
 
-        TodosStateFunctions.toggleDone(setTodos, taskID, newDoneValue);
+        TodosStateFunctions.toggleDoneInState(setTodos, taskID, newDoneValue);
     };
 
     socket.on("addTask", onTaskAdded);

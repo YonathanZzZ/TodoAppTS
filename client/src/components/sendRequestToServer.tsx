@@ -5,7 +5,6 @@ const serverURL = import.meta.env.DEV ? `http://localhost:8080` : '';
 
 const axiosInstance = axios.create({
     baseURL: serverURL,
-
 });
 
 axiosInstance.interceptors.request.use(
@@ -19,7 +18,6 @@ axiosInstance.interceptors.request.use(
     (error) => {
         return Promise.reject(error);
     });
-
 
 let authErrorHandler: (() => void) | null = null;
 

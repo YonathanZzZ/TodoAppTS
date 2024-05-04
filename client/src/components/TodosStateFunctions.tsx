@@ -1,12 +1,17 @@
 import {TodoData} from "../../../shared/todo-item.interface.ts";
 import {Dispatch, SetStateAction} from "react";
 
-export const addTodo = (setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>, taskID: string, taskData: TodoData) => {
+let setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>;
 
+export const initSetTodosFunc = (setTodosFunc: Dispatch<SetStateAction<Map<string, TodoData>>>) => {
+    setTodos = setTodosFunc;
+}
+
+export const addTodoToState = (taskID: string, taskData: TodoData) => {
     setTodos(prevTodos => new Map([...prevTodos, [taskID, taskData]]));
 };
 
-export const deleteTodo = (setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>, taskID: string) => {
+export const deleteTodoFromState = (taskID: string) => {
     setTodos(prevTodos => {
         const newTodos = new Map(prevTodos);
         newTodos.delete(taskID);
@@ -14,7 +19,7 @@ export const deleteTodo = (setTodos: Dispatch<SetStateAction<Map<string, TodoDat
     });
 };
 
-export const editTodo = (setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>, taskID: string, updatedContent: string) => {
+export const editTodoInState = (taskID: string, updatedContent: string) => {
     setTodos(prevTodos => {
         const newTodos = new Map(prevTodos);
         const updatedTodo = newTodos.get(taskID);
@@ -29,7 +34,7 @@ export const editTodo = (setTodos: Dispatch<SetStateAction<Map<string, TodoData>
     });
 };
 
-export const toggleDone = (setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>, taskID: string, newDoneValue?: boolean) => {
+export const toggleDoneInState = (taskID: string, newDoneValue?: boolean) => {
     setTodos(prevTodos => {
         const newTodos = new Map(prevTodos);
         const newTodo = newTodos.get(taskID);

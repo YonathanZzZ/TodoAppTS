@@ -1,23 +1,26 @@
 import Stack from "@mui/material/Stack";
 import {Box, TextField} from "@mui/material";
-import React, {Dispatch, SetStateAction, useState} from "react";
+import React, {useState} from "react";
 import Button from "@mui/material/Button";
 import {addUser, getAccessToken} from "./sendRequestToServer";
 import Cookies from 'js-cookie';
 import isEmail from 'validator/lib/isEmail';
-import DisplayAlert from "./DisplayAlert.tsx";
+import DisplayAlert from "./shared/DisplayAlert.tsx";
 import axios, {AxiosError} from "axios";
+import {useDispatch} from "react-redux";
+import {userActions} from "../redux/userSlice.tsx";
+import {useNavigate} from "react-router-dom";
 
-interface LoginPageProps {
-    setIsLoggedIn: Dispatch<SetStateAction<boolean>>
-}
 
-export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
+
+export const LoginPage = () => {
 
     const [emailInput, setEmailInput] = useState("");
     const [passwordInput, setPasswordInput] = useState("");
     const [inputErrors, setInputErrors] = useState({email: "", password: ""});
     const [alertMessage, setAlertMessage] = useState("");
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const isPasswordValid = (password: string) => {
         const hasMinLength = password.length >= 8;
@@ -100,7 +103,9 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
                 secure: true
             });
 
-            setIsLoggedIn(true);
+            dispatch(userActions.login({email: emailInput}));
+            navigate('/');
+
         } catch (error) {
             setAlertMessage(getAlertMessage(error));
         }
@@ -173,6 +178,8 @@ export const LoginPage = ({setIsLoggedIn}: LoginPageProps) => {
             console.error("Failed to login user: ", error);
         }
     };
+
+
 
     return (
         <Stack direction="column" spacing={1}>
