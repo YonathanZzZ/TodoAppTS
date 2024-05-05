@@ -1,5 +1,5 @@
-import { Box } from "@mui/material"
-import { default as TodoTabs } from "./TodoTabs"
+import {Box} from "@mui/material"
+import {default as TodoTabs} from "./TodoTabs"
 import TodoList from "./TodoList"
 import {Dispatch, SetStateAction, useEffect, useState} from "react";
 import TodoInput from "./TodoInput.tsx";
@@ -12,11 +12,18 @@ import {
 } from "./sendRequestToServer.tsx";
 import {emitAddTask, emitEditTask, emitRemoveTask, emitToggleDone, initSocket} from "./SocketManager.tsx";
 import {Todo, TodoData} from "../../../shared/todo-item.interface.ts";
-import {initSetTodosFunc, addTodoToState, editTodoInState, toggleDoneInState, deleteTodoFromState} from "./TodosStateFunctions.tsx";
+import {
+    initSetTodosFunc,
+    addTodoToState,
+    editTodoInState,
+    toggleDoneInState,
+    deleteTodoFromState
+} from "./TodosStateFunctions.tsx";
 import {useSelector} from "react-redux";
 import {RootState} from "../redux/store.tsx";
+import LinearLoading from "./LinearLoading.tsx";
 
-interface TodoContainerProps{
+interface TodoContainerProps {
     setAlertMessage: Dispatch<SetStateAction<string>>;
 }
 
@@ -26,6 +33,7 @@ const TodoContainer = ({setAlertMessage}: TodoContainerProps) => {
     const [tabIndex, setTabIndex] = useState(TODO_TAB);
     const [todos, setTodos] = useState(new Map<string, TodoData>());
     const email = useSelector((state: RootState) => state.user.email);
+    const [isLoading, setIsLoading] = useState(true);
 
     initSetTodosFunc(setTodos);
 
@@ -34,7 +42,7 @@ const TodoContainer = ({setAlertMessage}: TodoContainerProps) => {
             ? "http://localhost:8080"
             : window.location.origin;
 
-        initSocket(email, serverURL, setTodos);
+        initSocket(email, serverURL);
     }, []);
 
 
@@ -134,19 +142,24 @@ const TodoContainer = ({setAlertMessage}: TodoContainerProps) => {
             })
             .catch((error) => {
                 setAlertMessage(error.message);
-            });
+            }).finally(() => {
+                setIsLoading(false);
+        });
     }, []);
 
-
-
-    return(
-        <Box>
+    return (
+        <Box sx={{height: '90%'}}>
             <TodoInput addTodo={addTodo}/>
             <TodoTabs tabIndex={tabIndex} setTabIndex={setTabIndex}/>
-            {tabIndex === TODO_TAB ? (
-                <TodoList todos={getTasksByDoneValue(false)} remove={deleteTodo} edit={editContent} toggleDone={toggleDone} isDone={false}/>
-            ) : (
-                <TodoList todos={getTasksByDoneValue(true)} remove={deleteTodo} edit={editContent} toggleDone={toggleDone} isDone={true}/>
+
+            {isLoading ? (<LinearLoading/>) : (
+                tabIndex === TODO_TAB ? (
+                    <TodoList todos={getTasksByDoneValue(false)} remove={deleteTodo} edit={editContent}
+                              toggleDone={toggleDone} isDone={false}/>
+                ) : (
+                    <TodoList todos={getTasksByDoneValue(true)} remove={deleteTodo} edit={editContent}
+                              toggleDone={toggleDone} isDone={true}/>
+                )
             )}
         </Box>
     )

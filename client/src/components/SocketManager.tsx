@@ -1,6 +1,5 @@
 import io, { Socket } from 'socket.io-client';
 import * as TodosStateFunctions from './TodosStateFunctions';
-import { Dispatch, SetStateAction } from 'react';
 import {TodoData} from '../../../shared/todo-item.interface.ts';
 import {SocketEvents} from "../../../shared/socket-io.interface.ts";
 let socket: Socket<SocketEvents, SocketEvents> | null = null;
@@ -12,7 +11,7 @@ interface EventData {
     changeTaskDone: {id: string, done: boolean};
 }
 
-const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStateAction<Map<string, TodoData>>>) => {
+const initSocket = (email: string, serverURL: string) => {
     if(socket){
         //socket already initialized
         return;
@@ -29,25 +28,25 @@ const initSocket = (email: string, serverURL: string, setTodos: Dispatch<SetStat
         const taskID = newTask.id;
         const taskData = newTask.taskData;
 
-        TodosStateFunctions.addTodoToState(setTodos, taskID, taskData);
+        TodosStateFunctions.addTodoToState(taskID, taskData);
     };
 
     const onTaskRemoved = (taskID: string) => {
-        TodosStateFunctions.deleteTodoFromState(setTodos, taskID);
+        TodosStateFunctions.deleteTodoFromState(taskID);
     };
 
     const onTaskEdited = (data: {id: string, newContent: string}) => {
         const taskID = data.id;
         const newContent = data.newContent;
 
-        TodosStateFunctions.editTodoInState(setTodos, taskID, newContent);
+        TodosStateFunctions.editTodoInState(taskID, newContent);
     };
 
     const onChangeTaskDone = (data: {id: string, done: boolean}) => {
         const taskID = data.id;
         const newDoneValue = data.done;
 
-        TodosStateFunctions.toggleDoneInState(setTodos, taskID, newDoneValue);
+        TodosStateFunctions.toggleDoneInState(taskID, newDoneValue);
     };
 
     socket.on("addTask", onTaskAdded);

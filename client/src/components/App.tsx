@@ -5,7 +5,7 @@ import {LoginPage} from "./LoginPage";
 import Cookies from "js-cookie";
 import {getMUITheme} from "./theme";
 import {jwtDecode} from 'jwt-decode';
-import {Navigate, Route, Routes} from "react-router-dom";
+import {Navigate, Route, Routes, useNavigate} from "react-router-dom";
 import MainPage from "./MainPage.tsx";
 import Layout from "./Layout.tsx";
 import {useDispatch, useSelector} from "react-redux";
@@ -14,8 +14,8 @@ import {userActions} from "../redux/userSlice.tsx";
 
 function App() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [mode, setMode] = useState<PaletteMode>("light");
-
     const theme = getMUITheme(mode);
 
     useEffect(() => {
@@ -50,6 +50,7 @@ function App() {
 
         const decodedToken = jwtDecode<Token>(token);
         dispatch(userActions.login({email: decodedToken.email}))
+        navigate('/');
     }, []);
 
     const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
