@@ -9,8 +9,8 @@ import {
     deleteTaskFromDB,
     editTaskOnDB,
     getTasksFromDB,
-} from "./sendRequestToServer.tsx";
-import {emitAddTask, emitEditTask, emitRemoveTask, emitToggleDone, initSocket} from "./SocketManager.tsx";
+} from "../sendRequestToServer.ts";
+import {emitAddTask, emitEditTask, emitRemoveTask, emitToggleDone, initSocket} from "../SocketManager.ts";
 import {Todo, TodoData} from "../../../shared/todo-item.interface.ts";
 import {
     initSetTodosFunc,
@@ -18,10 +18,10 @@ import {
     editTodoInState,
     toggleDoneInState,
     deleteTodoFromState
-} from "./TodosStateFunctions.tsx";
+} from "../TodosStateFunctions.ts";
 import {useSelector} from "react-redux";
 import {RootState} from "../redux/store.tsx";
-import LinearLoading from "./LinearLoading.tsx";
+import Loading from "./Loading.tsx";
 
 interface TodoContainerProps {
     setAlertMessage: Dispatch<SetStateAction<string>>;
@@ -152,7 +152,7 @@ const TodoContainer = ({setAlertMessage}: TodoContainerProps) => {
             <TodoInput addTodo={addTodo}/>
             <TodoTabs tabIndex={tabIndex} setTabIndex={setTabIndex}/>
 
-            {isLoading ? (<LinearLoading/>) : (
+            {isLoading ? (<Loading/>) : (
                 tabIndex === TODO_TAB ? (
                     <TodoList todos={getTasksByDoneValue(false)} remove={deleteTodo} edit={editContent}
                               toggleDone={toggleDone} isDone={false}/>

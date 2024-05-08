@@ -2,7 +2,7 @@ import Stack from "@mui/material/Stack";
 import {Box, TextField} from "@mui/material";
 import React, {useState} from "react";
 import Button from "@mui/material/Button";
-import {addUser, getAccessToken} from "./sendRequestToServer";
+import {addUser, getAccessToken} from "../sendRequestToServer.ts";
 import Cookies from 'js-cookie';
 import isEmail from 'validator/lib/isEmail';
 import DisplayAlert from "./shared/DisplayAlert.tsx";

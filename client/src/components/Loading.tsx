@@ -1,6 +1,6 @@
 import {Box, CircularProgress} from "@mui/material"
 
-const LinearLoading = () => {
+const Loading = () => {
     return(
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '10%' }}>
             <CircularProgress />
@@ -8,4 +8,4 @@ const LinearLoading = () => {
     )
 }
 
-export default LinearLoading;
+export default Loading;

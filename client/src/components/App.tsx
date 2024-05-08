@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import {PaletteMode, ThemeProvider,} from "@mui/material";
 import {LoginPage} from "./LoginPage";
 import Cookies from "js-cookie";
-import {getMUITheme} from "./theme";
+import {getMUITheme} from "../theme.ts";
 import {jwtDecode} from 'jwt-decode';
 import {Navigate, Route, Routes, useNavigate} from "react-router-dom";
 import MainPage from "./MainPage.tsx";

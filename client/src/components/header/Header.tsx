@@ -2,7 +2,7 @@ import {AppBar, PaletteMode, Toolbar, Typography} from "@mui/material";
 import {ThemeToggle} from "./ThemeToggle.tsx";
 import {AccountMenu} from "./AccountMenu.tsx";
 import {Dispatch, SetStateAction} from "react";
-import {deleteUserFromDB} from "../sendRequestToServer.tsx";
+import {deleteUserFromDB} from "../../sendRequestToServer.ts";
 import Cookies from "js-cookie";
 import {userActions} from "../../redux/userSlice.tsx";
 import {useDispatch} from "react-redux";

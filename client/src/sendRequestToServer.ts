@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from "js-cookie";
-import {Todo} from "../../../shared/todo-item.interface.ts";
+import {Todo} from "../../shared/todo-item.interface.ts";
 const serverURL = import.meta.env.DEV ? `http://localhost:8080` : '';
 
 const axiosInstance = axios.create({
@@ -41,7 +41,7 @@ export const setAuthErrorHandler = (handler: () => void) => {
 
 export const getTasksFromDB = async () => {
     try {
-        const res = await axiosInstance.get(`${serverURL}/tasks`);
+        const res = await axiosInstance.get(`${serverURL}/api/tasks`);
         const tasks: Todo[] = res.data;
         return tasks;
     } catch (error) {
@@ -52,7 +52,7 @@ export const getTasksFromDB = async () => {
 export const addTaskToDB = async (task: Todo) => {
     const data = {task: task};
     try{
-         await axiosInstance.post(`${serverURL}/tasks`, data);
+         await axiosInstance.post(`${serverURL}/api/tasks`, data);
     }catch(error){
         throw new Error("Failed to add task to server");
     }
@@ -60,7 +60,7 @@ export const addTaskToDB = async (task: Todo) => {
 
 export const deleteTaskFromDB = async (taskID: string) => {
     try{
-        await axiosInstance.delete(`${serverURL}/tasks/${taskID}`);
+        await axiosInstance.delete(`${serverURL}/api/tasks/${taskID}`);
 
     }catch (error) {
         throw new Error("Failed to delete task from server");
@@ -69,7 +69,7 @@ export const deleteTaskFromDB = async (taskID: string) => {
 
 export const editTaskOnDB = async (taskID: string, updateData: any) => {
     try{
-        await axiosInstance.patch(`${serverURL}/tasks`, {
+        await axiosInstance.patch(`${serverURL}/api/tasks`, {
             id: taskID, updateData: updateData
         });
     }catch(error) {
@@ -78,14 +78,14 @@ export const editTaskOnDB = async (taskID: string, updateData: any) => {
 };
 
 export const addUser = async (email: string, password: string) => {
-        await axiosInstance.post(`${serverURL}/register`, {
+        await axiosInstance.post(`${serverURL}/users/register`, {
             email: email,
             password: password
         });
 };
 
 export const getAccessToken = async (email: string, password: string) => {
-        const res = await axiosInstance.post(`${serverURL}/login`, {
+        const res = await axiosInstance.post(`${serverURL}/users/login`, {
             email: email,
             password: password
         });

@@ -82,7 +82,7 @@ User.init(
     },
     {
         sequelize,
-        timestamps: false,
+        // timestamps: false,
         modelName: 'users',
     }
 )
@@ -111,7 +111,7 @@ Task.init(
     },
     {
         sequelize,
-        timestamps: false,
+        // timestamps: false,
         modelName: 'tasks',
     }
 );

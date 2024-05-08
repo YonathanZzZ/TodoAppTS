@@ -2,7 +2,7 @@ import TodoContainer from "./TodoContainer.tsx";
 import {Dispatch, SetStateAction, useEffect, useState} from "react";
 import Header from "./header/Header.tsx";
 import DisplayAlert from "./shared/DisplayAlert.tsx";
-import {setAuthErrorHandler} from "./sendRequestToServer.tsx";
+import {setAuthErrorHandler} from "../sendRequestToServer.ts";
 import {useDispatch} from "react-redux";
 import {userActions} from "../redux/userSlice.tsx";
 import {PaletteMode} from "@mui/material";

@@ -1,7 +1,7 @@
 import io, { Socket } from 'socket.io-client';
-import * as TodosStateFunctions from './TodosStateFunctions';
-import {TodoData} from '../../../shared/todo-item.interface.ts';
-import {SocketEvents} from "../../../shared/socket-io.interface.ts";
+import * as TodosStateFunctions from './TodosStateFunctions.ts';
+import {TodoData} from '../../shared/todo-item.interface.ts';
+import {SocketEvents} from "../../shared/socket-io.interface.ts";
 let socket: Socket<SocketEvents, SocketEvents> | null = null;
 
 interface EventData {
