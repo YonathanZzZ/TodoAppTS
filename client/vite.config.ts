@@ -6,7 +6,7 @@ const serverURL = 'http://localhost:8080';
 export default defineConfig(() => {
     return {
         build: {
-            outDir: 'public',
+            outDir: 'dist',
         },
         plugins: [react()],
     };
