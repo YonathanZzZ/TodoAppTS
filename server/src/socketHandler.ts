@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import http from "http";
 
 import {Server} from 'socket.io';
@@ -7,7 +9,7 @@ export const initializeSocket = (httpServer: http.Server) => {
 
     const io = !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? new Server<SocketEvents, SocketEvents>(httpServer, {
         cors: {
-            origin: 'http://localhost:5173',
+            origin: process.env.CLIENT_URL,
             credentials: true,
         }
     }) : new Server(httpServer);
