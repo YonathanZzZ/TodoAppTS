@@ -14,13 +14,10 @@ import userRouter from "./routes/userRouter";
 app.use(express.json());
 app.use(cookieParser());
 
-if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development'){
-    console.log('server running in development environment');
-    app.use(cors({
-        origin: 'http://localhost:5173',
-        credentials: true,
-    }));
-}
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+}));
 
 app.use('/api/tasks', taskRouter);
 app.use('/users', userRouter);
