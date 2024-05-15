@@ -25,7 +25,7 @@ if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development'){
 app.use('/api/tasks', taskRouter);
 app.use('/users', userRouter);
 
-app.use("/", (_req, res) => {
+app.get("/", (_req, res) => {
     res.send("Server is running");
 })
 
