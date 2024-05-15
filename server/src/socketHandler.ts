@@ -7,12 +7,12 @@ import {SocketEvents} from "../../shared/socket-io.interface";
 
 export const initializeSocket = (httpServer: http.Server) => {
 
-    const io = !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? new Server<SocketEvents, SocketEvents>(httpServer, {
+    const io = new Server<SocketEvents, SocketEvents>(httpServer, {
         cors: {
             origin: process.env.CLIENT_URL,
             credentials: true,
         }
-    }) : new Server(httpServer);
+    });
 
     io.on('connection', (socket) => {
 
