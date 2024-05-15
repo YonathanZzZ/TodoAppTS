@@ -28,10 +28,14 @@ if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development'){
 app.use('/api/tasks', taskRouter);
 app.use('/users', userRouter);
 
-app.get("*", (_req, res) => {
-    // res.sendFile(path.join(__dirname, BUILD_PATH + "index.html"));
+app.use("/", (req, res) => {
     res.send("Server is running");
 })
+
+// app.get("*", (_req, res) => {
+//     // res.sendFile(path.join(__dirname, BUILD_PATH + "index.html"));
+//     res.send("Server is running");
+// })
 
 initializeSocket(httpServer);
 
