@@ -5,11 +5,11 @@
       "src": "client",
       "use": "@vercel/react",
       "config": {
-        "outputDirectory": "build"
+        "outputDirectory": "public"
       }
     },
     {
-      "src": "server",
+      "src": "server.ts",
       "use": "@vercel/node",
       "config": {}
     }
@@ -17,7 +17,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/client/build/index.html"
+      "dest": "/client/public/index.html"
     }
   ]
 }
