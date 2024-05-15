@@ -5,7 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx ts-node -T server/src/server.ts"
+    "start": "npx ts-node -T server/src/server.ts",
+    "predeploy": "cd ./client && npm install && vite build && cd ../server && npm install"
   },
   "author": "",
   "license": "ISC",
