@@ -17,7 +17,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/build/index.html"
+      "dest": "/client/build/index.html"
     }
   ]
 }
