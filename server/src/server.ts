@@ -28,6 +28,10 @@ app.get("/", (_req, res) => {
 
 // initializeSocket(httpServer);
 
-httpServer.listen(PORT, () => {
+// httpServer.listen(PORT, () => {
+//     console.log('server is running on port: ', PORT);
+// })
+
+app.listen(PORT, () => {
     console.log('server is running on port: ', PORT);
 })
