@@ -5,11 +5,11 @@ const app = express();
 const PORT = process.env.PORT;
 import cookieParser from 'cookie-parser';
 import http from 'http';
-import {initializeSocket} from './socketHandler';
+import {initializeSocket} from './src/socketHandler';
 const httpServer = http.createServer(app);
 import cors from 'cors';
-import taskRouter from "./routes/taskRouter";
-import userRouter from "./routes/userRouter";
+import taskRouter from "./src/routes/taskRouter";
+import userRouter from "./src/routes/userRouter";
 
 app.use(express.json());
 app.use(cookieParser());
