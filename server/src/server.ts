@@ -14,10 +14,10 @@ import userRouter from "./routes/userRouter";
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-}));
+// app.use(cors({
+//     origin: process.env.CLIENT_URL,
+//     credentials: true,
+// }));
 
 // app.use('/api/tasks', taskRouter);
 // app.use('/users', userRouter);
@@ -26,7 +26,7 @@ app.get("/", (_req, res) => {
     res.send("Server is running");
 })
 
-initializeSocket(httpServer);
+// initializeSocket(httpServer);
 
 httpServer.listen(PORT, () => {
     console.log('server is running on port: ', PORT);
