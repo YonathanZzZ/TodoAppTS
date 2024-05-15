@@ -5,7 +5,7 @@
       "src": "client",
       "use": "@vercel/react",
       "config": {
-        "outputDirectory": "public"
+        "outputDirectory": "build"
       }
     },
     {
