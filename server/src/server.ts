@@ -29,7 +29,8 @@ app.use('/api/tasks', taskRouter);
 app.use('/users', userRouter);
 
 app.get("*", (_req, res) => {
-    res.sendFile(path.join(__dirname, BUILD_PATH + "index.html"));
+    // res.sendFile(path.join(__dirname, BUILD_PATH + "index.html"));
+    res.send("Server is running");
 })
 
 initializeSocket(httpServer);
