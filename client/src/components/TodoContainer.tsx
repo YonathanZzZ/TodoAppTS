@@ -38,9 +38,7 @@ const TodoContainer = ({setAlertMessage}: TodoContainerProps) => {
     initSetTodosFunc(setTodos);
 
     useEffect(() => {
-        const serverURL = import.meta.env.DEV
-            ? "http://localhost:8080"
-            : window.location.origin;
+        const serverURL = import.meta.env.VITE_SERVER_URL;
 
         initSocket(email, serverURL);
     }, []);
