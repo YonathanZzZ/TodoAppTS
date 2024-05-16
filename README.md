@@ -3,7 +3,7 @@
 A Todo webapp built with React for the client-side and Node.js for the server-side. It provides basic Todo functionalities such as adding, editing and removing tasks, and marking tasks as done. Additionally, users can register and login to access their personalized Todo lists, and their data is stored in an SQL database.
 
 ## Access the app
-You can access the deployed Todo app [here](https://todo-yonathan-43eab9f75c75.herokuapp.com/)
+You can access the deployed Todo app [here](https://todo-app-tclient.vercel.app/)
 
 ## Features
 
