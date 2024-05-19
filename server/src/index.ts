@@ -8,8 +8,8 @@ import http from 'http';
 import {initializeSocket} from './socketHandler';
 const httpServer = http.createServer(app);
 import cors from 'cors';
-import taskRouter from "./routes/taskRouter";
-import userRouter from "./routes/userRouter";
+import taskRouter from "./routes/task.routes";
+import userRouter from "./routes/user.routes";
 
 app.use(express.json());
 app.use(cookieParser());
@@ -27,3 +27,5 @@ initializeSocket(httpServer);
 httpServer.listen(PORT, () => {
     console.log('server is running on port: ', PORT);
 })
+
+export const server = httpServer;

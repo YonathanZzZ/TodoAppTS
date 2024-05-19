@@ -16,8 +16,8 @@ export const registrationMiddleware = async (req: Request, res: Response, next: 
 
     const { email } = req.body;
 
-    const checkUser = await isUserRegistered(email);
-    if(checkUser){
+    const userRegistered = await isUserRegistered(email);
+    if(userRegistered){
         res.status(409).json('user already exists');
         return;
     }

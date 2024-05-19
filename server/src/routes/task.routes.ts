@@ -7,8 +7,6 @@ router.post('/', authenticateToken, async (req, res) => {
     const task = req.body.task;
     const email = req.user?.email;
 
-    //TODO: check if task is valid (not null and of type Todo)
-
     if(!email){
         console.error('request missing user property');
         res.status(500).json('internal server error');
@@ -17,7 +15,6 @@ router.post('/', authenticateToken, async (req, res) => {
 
     try{
         await addTaskToDB(task, email);
-        console.log('task successfully added to db');
         res.status(200).json('task added');
     }catch(error){
         console.error('failed to add task to db: ', error);
@@ -29,12 +26,15 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     const taskID = req.params.id;
 
     try{
-        await deleteTask(taskID);
-        console.log('task successfully removed from db');
+        const deleteRes = await deleteTask(taskID);
+        if(!deleteRes){
+            res.status(404).json('the task with the specified ID does not exist.');
+            return;
+        }
+
         res.status(200).json('task removed');
     }catch(error){
-        console.error('failed to remove task from db: ', error);
-        res.status(500).json('internal server error');
+        res.status(500).json('internal server error.');
     }
 });
 
@@ -44,8 +44,12 @@ router.patch('/', authenticateToken, async (req, res) => {
     const updateData = req.body.updateData;
 
     try{
-        await updateTask(taskID, updateData);
-        console.log('task successfully updated on db');
+        const updateRes = await updateTask(taskID, updateData);
+        if(!updateRes){
+            res.status(404).json('task not found');
+            return;
+        }
+
         res.status(200).json('task updated');
     }catch(error){
         console.error('failed to update task on db', error);

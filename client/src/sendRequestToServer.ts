@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import {Todo} from "../../shared/todo-item.interface.ts";
 
 const serverURL = import.meta.env.VITE_SERVER_URL;
-console.log('serverURL from env var: ', serverURL);
 
 const axiosInstance = axios.create({
     baseURL: serverURL,
@@ -51,8 +50,8 @@ export const getTasksFromDB = async () => {
     }
 };
 
-export const addTaskToDB = async (task: Todo) => {
-    const data = {task: task};
+export const addTaskToDB = async (todo: Todo) => {
+    const data = {task: todo};
     try {
         await axiosInstance.post(`${serverURL}/api/tasks`, data);
     } catch (error) {

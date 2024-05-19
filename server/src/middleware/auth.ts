@@ -32,15 +32,18 @@ export const authenticateToken =  (req: Request, res: Response, next: NextFuncti
         res.status(401).json('Unauthorized: missing token');
         return;
     }
+    let user;
+    try{
+        user = jwt.verify(token, secretKey);
+        if(!isUser(user)){
+            throw new Error();
+        }
 
-    const user =  jwt.verify(token, secretKey);
-    if (!user || !isUser(user)) {
+        req.user = user;
+        next();
+    }catch(error){
         res.status(403).json('Forbidden: invalid token');
-        return;
     }
-
-    req.user = user;
-    next();
 };
 
 

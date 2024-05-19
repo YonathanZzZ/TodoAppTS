@@ -45,8 +45,9 @@ class Task extends Model<TaskAttributes> {
     }
 }
 
-const sequelize = new Sequelize(
-    getEnv('DB_DATABASE'),
+export const sequelize = new Sequelize(
+
+    getEnv(process.env.NODE_ENV === 'test' ? 'DB_TEST_DATABASE' : 'DB_DATABASE'),
     getEnv('DB_USERNAME'),
     getEnv('DB_PASSWORD'),
     {
@@ -125,17 +126,19 @@ sequelize.sync({alter: true}).then(() => {
 });
 
 //define functions to work with db
-export const addTaskToDB = (task: Todo, email: string) => {
-    const dbTask = {...task, email}
-    return Task.create(dbTask);
+export const addTaskToDB = async (task: Todo, email: string) => {
+    const dbTask = {...task, email};
+    await Task.create(dbTask);
 };
 
-export const deleteTask = (taskID: string) => {
-    return Task.destroy({
+export const deleteTask = async (taskID: string) => {
+    const deleteCount = await Task.destroy({
         where: {
             id: taskID
         }
     });
+
+    return deleteCount > 0;
 };
 
 interface ContentUpdate {
@@ -148,12 +151,17 @@ interface DoneUpdate {
 
 type TaskUpdate = ContentUpdate | DoneUpdate
 
-export const updateTask = (taskID: string, taskUpdate: TaskUpdate) => {
-    return Task.update(taskUpdate, {
+export const updateTask = async (taskID: string, taskUpdate: TaskUpdate) => {
+
+    const updateRes = await Task.update(taskUpdate, {
         where: {
             id: taskID
         }
     });
+
+    const numOfAffectedRows = updateRes[0];
+
+    return numOfAffectedRows > 0;
 };
 
 export const getUserTasks = async (email: string) => {
@@ -179,26 +187,28 @@ export const getUserTasks = async (email: string) => {
     }
 };
 
-export const addUser = (email: string, password: string) => {
-    return User.create({
+export const addUser = async (email: string, password: string) => {
+    await User.create({
         email: email,
         password: password
     });
 };
 
-export const deleteUser = (email: string) => {
-    return User.destroy({
+export const deleteUser = async (email: string) => {
+    const deleteCount = await User.destroy({
         where: {
             email: email
         }
     });
+
+    return deleteCount > 0;
 };
 
 export const getUserPassword = async (email: string) => {
 
     const user = await User.findOne({where: {email: email}});
     if (!user) {
-        return false;
+        return null;
     }
 
     return user.password;

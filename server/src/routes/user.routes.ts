@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import express from "express";
 import {registrationMiddleware} from "../middleware/registration-validation";
 import {authenticateToken} from "../middleware/auth";
+import {User} from "../../interfaces/user.interface";
 const router = express.Router();
 const saltRounds = 10;
 
@@ -44,13 +45,13 @@ router.post('/register', registrationMiddleware, async (req, res) => {
             res.status(200).json('user added');
         }catch(error){
             console.error('failed to add user to DB: ', error);
-            res.status(500).json('failed to add user');
+            res.status(500).json('internal server error');
         }
     });
 });
 
 router.delete('/', authenticateToken, async (req, res) => {
-    const emailToDelete = req.body.user.email;
+    const emailToDelete = req.user?.email;
 
     if (!emailToDelete) {
         res.status(400).json('invalid request');
@@ -58,11 +59,16 @@ router.delete('/', authenticateToken, async (req, res) => {
     }
 
     try{
-        await deleteUser(emailToDelete);
+        const deleteRes = await deleteUser(emailToDelete);
+        if(!deleteRes){
+            res.status(404).json('User not found');
+            return;
+        }
+
         res.json('user deleted');
     }catch(error){
         console.error('failed to delete user: ', error);
-        res.status(500).json('failed to delete user');
+        res.status(500).json('internal server error');
     }
 });
 
