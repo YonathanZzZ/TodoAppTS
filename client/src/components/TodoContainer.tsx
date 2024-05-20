@@ -11,7 +11,7 @@ import {
     getTasksFromDB,
 } from "../sendRequestToServer.ts";
 import {emitAddTask, emitEditTask, emitRemoveTask, emitToggleDone, initSocket} from "../SocketManager.ts";
-import {Todo, TodoData} from "../../../shared/todo-item.interface.ts";
+import {Todo, TodoData} from "../../../shared/interfaces/todo-item.interface.ts";
 import {
     initSetTodosFunc,
     addTodoToState,

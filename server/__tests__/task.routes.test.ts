@@ -50,9 +50,18 @@ describe('Test task routes', () => {
         expect(res.body).toBe("task removed");
     });
 
-    test("Delete task - Task does not exist", async () => {
+    test("Delete task - Invalid ID", async () => {
         await request(server).post("/api/tasks").set('Authorization', `Bearer ${token}`).send(exampleTask);
         const res = await request(server).delete('/api/tasks/123').set('Authorization', `Bearer ${token}`).send();
+
+        expect(res.status).toBe(400);
+
+        await deleteTask(exampleTask.task.id);
+    });
+
+    test("Delete task - Task Does Not Exist", async () => {
+        await request(server).post("/api/tasks").set('Authorization', `Bearer ${token}`).send(exampleTask);
+        const res = await request(server).delete('/api/tasks/a813c5de-0b2a-4ff3-8ba1-f729138f62c2').set('Authorization', `Bearer ${token}`).send();
 
         expect(res.status).toBe(404);
 

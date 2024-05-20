@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Cookies from "js-cookie";
-import {Todo} from "../../shared/todo-item.interface.ts";
+import {Todo} from "../../shared/interfaces/todo-item.interface.ts";
 
 const serverURL = import.meta.env.VITE_SERVER_URL;
 

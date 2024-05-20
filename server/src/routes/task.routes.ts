@@ -1,17 +1,26 @@
 import {authenticateToken} from "../middleware/auth";
 import {addTaskToDB, deleteTask, getUserTasks, updateTask} from "../dbHandler";
 import express from "express";
+import {idSchema, todoSchema, updateSchema} from "../schemas/todoSchema";
+import {emailSchema} from "../schemas/userSchema";
 const router = express.Router();
 
 router.post('/', authenticateToken, async (req, res) => {
-    const task = req.body.task;
-    const email = req.user?.email;
-
-    if(!email){
-        console.error('request missing user property');
-        res.status(500).json('internal server error');
+    const taskParseRes = todoSchema.safeParse(req.body.task);
+    if(!taskParseRes.success){
+        res.status(400).json('bad request');
         return;
     }
+
+    const task = taskParseRes.data;
+
+    const emailParseRes = emailSchema.safeParse(req.user);
+    if(!emailParseRes.success){
+        res.status(400).json('bad request');
+        return;
+    }
+
+    const email = emailParseRes.data.email;
 
     try{
         await addTaskToDB(task, email);
@@ -23,7 +32,16 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 router.delete('/:id', authenticateToken, async (req, res) => {
-    const taskID = req.params.id;
+    const idParseRes = idSchema.safeParse(req.params);
+    if(!idParseRes.success){
+        res.status(400).json('bad request');
+        return;
+    }
+
+    const taskID = idParseRes.data.id;
+
+    //TODO modify deleteTask (in dbHandler) to receive both email and taskID, to ensure only the owner of the task can delete it.
+    // use email from req.user and validate with schema.
 
     try{
         const deleteRes = await deleteTask(taskID);
@@ -40,8 +58,23 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
 router.patch('/', authenticateToken, async (req, res) => {
 
-    const taskID = req.body.id;
-    const updateData = req.body.updateData;
+    const idParseRes = idSchema.safeParse(req.body);
+    console.log('req.body in patch (update): ', req.body);
+    if(!idParseRes.success){
+        res.status(400).json('bad request');
+        return;
+    }
+
+    const taskID = idParseRes.data.id;
+
+    // const updateData = req.body.updateData;
+    const updateParseRes = updateSchema.safeParse(req.body.updateData);
+    if(!updateParseRes.success){
+        res.status(400).json('bad request');
+        return;
+    }
+
+    const updateData = updateParseRes.data;
 
     try{
         const updateRes = await updateTask(taskID, updateData);
@@ -58,7 +91,13 @@ router.patch('/', authenticateToken, async (req, res) => {
 });
 
 router.get('/', authenticateToken, async (req, res) => {
-    const email = req.user?.email; // user was set by the auth middleware
+    const emailParseRes = emailSchema.safeParse(req.user);
+    if(!emailParseRes.success){
+        res.status(400).json('bad request');
+        return;
+    }
+
+    const email = emailParseRes.data.email;
 
     if(!email){
         console.error('request missing user property');

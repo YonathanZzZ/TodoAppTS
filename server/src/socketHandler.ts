@@ -3,7 +3,7 @@ dotenv.config();
 import http from "http";
 
 import {Server} from 'socket.io';
-import {SocketEvents} from "../../shared/socket-io.interface";
+import {SocketEvents} from "../../shared/interfaces/socket-io.interface";
 
 export const initializeSocket = (httpServer: http.Server) => {
 

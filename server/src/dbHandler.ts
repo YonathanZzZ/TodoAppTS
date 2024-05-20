@@ -1,6 +1,6 @@
 import {Model, Sequelize, Table} from "sequelize-typescript";
 import {DataTypes, Optional} from "sequelize";
-import {Todo} from "../../shared/todo-item.interface";
+import {Todo} from "../../shared/interfaces/todo-item.interface";
 
 const HASH_LENGTH = 60;
 
@@ -141,15 +141,10 @@ export const deleteTask = async (taskID: string) => {
     return deleteCount > 0;
 };
 
-interface ContentUpdate {
-    content: string;
+interface TaskUpdate{
+    content?: string;
+    done?: boolean;
 }
-
-interface DoneUpdate {
-    done: boolean;
-}
-
-type TaskUpdate = ContentUpdate | DoneUpdate
 
 export const updateTask = async (taskID: string, taskUpdate: TaskUpdate) => {
 

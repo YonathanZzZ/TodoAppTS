@@ -29,6 +29,26 @@ describe("Test user routes", () => {
         await deleteUser(email);
     });
 
+    test("Register User - Invalid email address", async () => {
+        const email = "notAnEmail";
+        const requestBody = { email: email, password: "SrRc7hV@iV27d2" };
+        await request(server).post("/users/register").send(requestBody);
+
+        const res = await request(server).post("/users/register").send(requestBody);
+
+        expect(res.status).toBe(400);
+    });
+
+    test("Register User - Invalid (weak) Password", async () => {
+        const email = "testEmail@example.com";
+        const requestBody = { email: email, password: "123" };
+        await request(server).post("/users/register").send(requestBody);
+
+        const res = await request(server).post("/users/register").send(requestBody);
+
+        expect(res.status).toBe(400);
+    });
+
     test("Login User - Success", async () => {
         const email = "testEmail@example.com";
         const password = "SrRc7hV@iV27d2";

@@ -3,7 +3,7 @@ import {List, ListItem} from '@mui/material';
 import Divider from '@mui/material/Divider';
 import {EditedItem} from "./EditedItem";
 import {TodoItem} from "./TodoItem";
-import {TodoData} from "../../../shared/todo-item.interface.ts";
+import {TodoData} from "../../../shared/interfaces/todo-item.interface.ts";
 
 interface TodoListProps{
     todos: Map<string, TodoData>;
