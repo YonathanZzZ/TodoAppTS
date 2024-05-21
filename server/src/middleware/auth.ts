@@ -1,6 +1,7 @@
 import jwt, {JwtPayload} from 'jsonwebtoken';
 import {NextFunction, Request, Response} from "express";
 import {User} from "../../interfaces/user.interface";
+import {UserRequest} from "../../interfaces/userRequest.interface";
 
 const secretKey = process.env.JWT_SECRET_KEY;
 if (!secretKey) {
@@ -20,7 +21,7 @@ const extractTokenFromHeader = (authHeader: string) => {
 const isUser = (payload: string | JwtPayload): payload is User => {
     return (payload as User).email !== undefined;
 }
-export const authenticateToken =  (req: Request, res: Response, next: NextFunction) => {
+export const authenticateToken =  (req: UserRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         res.status(401).json('Unauthorized: missing auth header');

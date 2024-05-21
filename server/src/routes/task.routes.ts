@@ -1,11 +1,16 @@
 import {authenticateToken} from "../middleware/auth";
 import {addTaskToDB, deleteTask, getUserTasks, updateTask} from "../dbHandler";
 import express from "express";
+import {Request, Response} from "express";
 import {idSchema, todoSchema, updateSchema} from "../schemas/todoSchema";
 import {emailSchema} from "../schemas/userSchema";
+import {User} from "../../interfaces/user.interface";
+import {UserRequest} from "../../interfaces/userRequest.interface";
 const router = express.Router();
 
-router.post('/', authenticateToken, async (req, res) => {
+
+
+router.post('/', authenticateToken, async (req: UserRequest, res: Response) => {
     const taskParseRes = todoSchema.safeParse(req.body.task);
     if(!taskParseRes.success){
         res.status(400).json('bad request');
@@ -31,7 +36,7 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 });
 
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
     const idParseRes = idSchema.safeParse(req.params);
     if(!idParseRes.success){
         res.status(400).json('bad request');
@@ -56,7 +61,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     }
 });
 
-router.patch('/', authenticateToken, async (req, res) => {
+router.patch('/', authenticateToken, async (req: Request, res: Response) => {
 
     const idParseRes = idSchema.safeParse(req.body);
     console.log('req.body in patch (update): ', req.body);
@@ -90,7 +95,7 @@ router.patch('/', authenticateToken, async (req, res) => {
     }
 });
 
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, async (req: UserRequest, res: Response) => {
     const emailParseRes = emailSchema.safeParse(req.user);
     if(!emailParseRes.success){
         res.status(400).json('bad request');
@@ -100,7 +105,7 @@ router.get('/', authenticateToken, async (req, res) => {
     const email = emailParseRes.data.email;
 
     if(!email){
-        console.error('request missing user property');
+        console.error('request missing email property');
         res.status(500).json('internal server error');
         return;
     }

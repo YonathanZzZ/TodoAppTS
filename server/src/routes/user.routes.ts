@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import express from "express";
 import {authenticateToken} from "../middleware/auth";
 import {emailSchema, userSchema} from "../schemas/userSchema";
+import {UserRequest} from "../../interfaces/userRequest.interface";
 const router = express.Router();
 const saltRounds = 10;
 
@@ -67,7 +68,7 @@ router.post('/register', async (req, res) => {
         });
 });
 
-router.delete('/', authenticateToken, async (req, res) => {
+router.delete('/', authenticateToken, async (req: UserRequest, res) => {
         const parseRes = emailSchema.safeParse(req.user);
         if(!parseRes.success){
             res.status(400).json('bad request');

@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:dev": "nodemon src/index.ts",
-    "start": "npx ts-node -T src/index.ts",
+    "dev": "nodemon src/index.ts",
+    "start": "npx ts-node src/index.ts",
     "build": "tsc",
     "test": "jest --coverage --forceExit"
   },
