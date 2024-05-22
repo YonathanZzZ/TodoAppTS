@@ -1,15 +1,16 @@
 import Stack from "@mui/material/Stack";
-import {Box, TextField} from "@mui/material";
+import {Box, CircularProgress, TextField} from "@mui/material";
 import React, {useState} from "react";
 import Button from "@mui/material/Button";
-import {addUser, getAccessToken} from "../sendRequestToServer.ts";
+import {addUser, getAccessToken} from "../../sendRequestToServer.ts";
 import Cookies from 'js-cookie';
 import isEmail from 'validator/lib/isEmail';
-import DisplayAlert from "./shared/DisplayAlert.tsx";
+import DisplayAlert from "../shared/DisplayAlert.tsx";
 import axios, {AxiosError} from "axios";
 import {useDispatch} from "react-redux";
-import {userActions} from "../redux/userSlice.tsx";
+import {userActions} from "../../redux/userSlice.tsx";
 import {useNavigate} from "react-router-dom";
+import LoginButton from "./LoginButton.tsx";
 
 
 
@@ -19,6 +20,7 @@ export const LoginPage = () => {
     const [passwordInput, setPasswordInput] = useState("");
     const [inputErrors, setInputErrors] = useState({email: "", password: ""});
     const [alertMessage, setAlertMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -79,19 +81,9 @@ export const LoginPage = () => {
     }
 
     const getAlertMessage = (error: any) => {
-        let resMessage: string;
+        const unknownError = "Unknown connection error";
         const statusCode = extractStatusCode(error);
-        if (!statusCode) {
-            resMessage = "Unknown error while trying to log-in";
-        } else {
-            const message = statusCodeMessages[statusCode];
-            if (!message) {
-                resMessage = "Unknown error while trying to log-in";
-            } else {
-                resMessage = message;
-            }
-        }
-        return resMessage;
+        return statusCode ? (statusCodeMessages[statusCode] || unknownError) : unknownError;
     }
 
     const loginUser = async () => {
@@ -149,7 +141,9 @@ export const LoginPage = () => {
             return;
         }
 
+        setIsLoading(true);
         await loginUser();
+        setIsLoading(false);
     };
 
     const handleRegisterButton = async () => {
@@ -160,10 +154,13 @@ export const LoginPage = () => {
         }
 
         try {
+            setIsLoading(true);
             await addUser(emailInput, passwordInput);
             await loginUser();
         } catch (error: any) {
             setAlertMessage(getAlertMessage(error));
+        }finally {
+            setIsLoading(false);
         }
     }
 
@@ -178,8 +175,6 @@ export const LoginPage = () => {
             console.error("Failed to login user: ", error);
         }
     };
-
-
 
     return (
         <Stack direction="column" spacing={1}>
@@ -224,8 +219,16 @@ export const LoginPage = () => {
             />
             <Box style={{margin: '5px'}}>
                 <Stack direction="row" justifyContent="space-between">
-                    <Button variant="contained" onClick={handleLoginButton}>Login</Button>
-                    <Button variant="contained" onClick={handleRegisterButton}>Register</Button>
+                    <LoginButton
+                        text="Login"
+                        isLoading={isLoading}
+                        handleClick={handleLoginButton}
+                    />
+                    <LoginButton
+                        text="Register"
+                        isLoading={isLoading}
+                        handleClick={handleRegisterButton}
+                    />
                 </Stack>
             </Box>
         </Stack>

@@ -1,7 +1,7 @@
 import "../App.css";
 import {useEffect, useState} from "react";
 import {PaletteMode, ThemeProvider,} from "@mui/material";
-import {LoginPage} from "./LoginPage";
+import {LoginPage} from "./login/LoginPage.tsx";
 import Cookies from "js-cookie";
 import {getMUITheme} from "../theme.ts";
 import {jwtDecode} from 'jwt-decode';
