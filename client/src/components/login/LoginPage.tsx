@@ -1,7 +1,6 @@
 import Stack from "@mui/material/Stack";
-import {Box, CircularProgress, TextField} from "@mui/material";
-import React, {useState} from "react";
-import Button from "@mui/material/Button";
+import {Box, TextField} from "@mui/material";
+import React, {useRef, useState} from "react";
 import {addUser, getAccessToken} from "../../sendRequestToServer.ts";
 import Cookies from 'js-cookie';
 import isEmail from 'validator/lib/isEmail';
@@ -12,12 +11,12 @@ import {userActions} from "../../redux/userSlice.tsx";
 import {useNavigate} from "react-router-dom";
 import LoginButton from "./LoginButton.tsx";
 
-
-
 export const LoginPage = () => {
 
-    const [emailInput, setEmailInput] = useState("");
-    const [passwordInput, setPasswordInput] = useState("");
+    // const [emailInput, setEmailInput] = useState("");
+    // const [passwordInput, setPasswordInput] = useState("");
+    const emailInput = useRef("");
+    const passwordInput = useRef("");
     const [inputErrors, setInputErrors] = useState({email: "", password: ""});
     const [alertMessage, setAlertMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +35,7 @@ export const LoginPage = () => {
     const areRegisterFieldsValid = () => {
         let isValid = true;
 
-        if (!isEmail(emailInput)) {
+        if (!isEmail(emailInput.current)) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 email: "Invalid email address"
@@ -45,7 +44,7 @@ export const LoginPage = () => {
             isValid = false;
         }
 
-        if (!isPasswordValid(passwordInput)) {
+        if (!isPasswordValid(passwordInput.current)) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 password: "Password must be at least 8 characters long and contain at least 1 digit and 1 lowercase and uppercase letters",
@@ -88,14 +87,14 @@ export const LoginPage = () => {
 
     const loginUser = async () => {
         try {
-            const token = await getAccessToken(emailInput, passwordInput);
+            const token = await getAccessToken(emailInput.current, passwordInput.current);
 
             Cookies.set('token', token, {
                 sameSite: 'strict',
                 secure: true
             });
 
-            dispatch(userActions.login({email: emailInput}));
+            dispatch(userActions.login({email: emailInput.current}));
             navigate('/');
 
         } catch (error) {
@@ -122,7 +121,7 @@ export const LoginPage = () => {
             }));
 
             valid = false;
-        } else if (!isEmail(emailInput)) {
+        } else if (!isEmail(emailInput.current)) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 email: "Invalid email",
@@ -155,7 +154,7 @@ export const LoginPage = () => {
 
         try {
             setIsLoading(true);
-            await addUser(emailInput, passwordInput);
+            await addUser(emailInput.current, passwordInput.current);
             await loginUser();
         } catch (error: any) {
             setAlertMessage(getAlertMessage(error));
@@ -187,6 +186,7 @@ export const LoginPage = () => {
                     onClose={() => setAlertMessage("")}
                 />
             )}
+
             <TextField
                 id="email-field"
                 autoFocus={true}
@@ -198,7 +198,7 @@ export const LoginPage = () => {
                 error={Boolean(inputErrors.email)}
                 helperText={inputErrors.email}
                 onChange={(e) => {
-                    setEmailInput(e.target.value);
+                    emailInput.current = e.target.value;
                 }}
                 onKeyDown={handleKeyDown}
             />
@@ -213,10 +213,11 @@ export const LoginPage = () => {
                 error={Boolean(inputErrors.password)}
                 helperText={inputErrors.password}
                 onChange={(e) => {
-                    setPasswordInput(e.target.value);
+                    passwordInput.current = e.target.value;
                 }}
                 onKeyDown={handleKeyDown}
             />
+
             <Box style={{margin: '5px'}}>
                 <Stack direction="row" justifyContent="space-between">
                     <LoginButton

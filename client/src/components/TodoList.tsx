@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {List, ListItem} from '@mui/material';
 import Divider from '@mui/material/Divider';
 import {EditedItem} from "./EditedItem";
@@ -15,21 +15,24 @@ interface TodoListProps{
 
 const TodoList = ({todos, remove, edit, toggleDone, isDone}: TodoListProps) => {
     const [editingTaskID, setEditingTaskID] = useState("");
-    const [editedText, setEditedText] = useState('');
+    // const [editedText, setEditedText] = useState('');
+    const editedText = useRef("");
 
     const startEditing = (taskID: string, text: string) => {
         setEditingTaskID(taskID);
-        setEditedText(text);
+        // setEditedText(text);
+        editedText.current = text;
     };
 
     const cancelEditing = () => {
         setEditingTaskID("");
-        setEditedText('');
+        // setEditedText('');
+        editedText.current = '';
     };
 
     const saveEditing = (taskID: string) => {
-        if (editedText.trim() !== '') {
-            edit(taskID, editedText);
+        if (editedText.current.trim() !== '') {
+            edit(taskID, editedText.current);
             cancelEditing();
         }
     };
@@ -43,7 +46,6 @@ const TodoList = ({todos, remove, edit, toggleDone, isDone}: TodoListProps) => {
                             <EditedItem
                                 taskID={taskID}
                                 editedText={editedText}
-                                setEditedText={setEditedText}
                                 saveEditing={saveEditing}
                                 cancelEditing={cancelEditing}
                             />

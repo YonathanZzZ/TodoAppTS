@@ -1,39 +1,30 @@
 import {Box} from "@mui/material"
-import {default as TodoTabs} from "./TodoTabs"
-import TodoList from "./TodoList"
 import {Dispatch, SetStateAction, useEffect, useState} from "react";
 import TodoInput from "./TodoInput.tsx";
 import {v4 as uuidv4} from "uuid";
 import {
     addTaskToDB,
-    deleteTaskFromDB,
-    editTaskOnDB,
-    getTasksFromDB,
+
 } from "../sendRequestToServer.ts";
-import {emitAddTask, emitEditTask, emitRemoveTask, emitToggleDone, initSocket} from "../SocketManager.ts";
-import {Todo, TodoData} from "../../../shared/interfaces/todo-item.interface.ts";
+import {emitAddTask, initSocket} from "../SocketManager.ts";
 import {
     initSetTodosFunc,
     addTodoToState,
-    editTodoInState,
-    toggleDoneInState,
     deleteTodoFromState
 } from "../TodosStateFunctions.ts";
 import {useSelector} from "react-redux";
 import {RootState} from "../redux/store.tsx";
-import Loading from "./Loading.tsx";
+import ListContainer from "./ListContainer.tsx";
+import {TodoData} from "../../../shared/interfaces/todo-item.interface.ts";
 
 interface TodoContainerProps {
     setAlertMessage: Dispatch<SetStateAction<string>>;
 }
 
 const TodoContainer = ({setAlertMessage}: TodoContainerProps) => {
-    const TODO_TAB = 0;
-
-    const [tabIndex, setTabIndex] = useState(TODO_TAB);
     const [todos, setTodos] = useState(new Map<string, TodoData>());
+
     const email = useSelector((state: RootState) => state.user.email);
-    const [isLoading, setIsLoading] = useState(true);
 
     initSetTodosFunc(setTodos);
 
@@ -66,99 +57,10 @@ const TodoContainer = ({setAlertMessage}: TodoContainerProps) => {
         }
     };
 
-    const deleteTodo = async (taskID: string) => {
-        const todoDataBackup = todos.get(taskID);
-        if (!todoDataBackup) {
-            return;
-        }
-
-        deleteTodoFromState(taskID);
-
-        try {
-            await deleteTaskFromDB(taskID);
-            emitRemoveTask(taskID);
-        } catch (error) {
-            setAlertMessage("Failed to delete task on server");
-            addTodoToState(taskID, todoDataBackup);
-        }
-    };
-
-    const editContent = async (taskID: string, updatedContent: string) => {
-        const contentBackup = todos.get(taskID)?.content;
-        if (!contentBackup) {
-            return;
-        }
-
-        editTodoInState(taskID, updatedContent);
-
-        try {
-            await editTaskOnDB(taskID, {content: updatedContent});
-            emitEditTask({id: taskID, newContent: updatedContent});
-        } catch (error) {
-            setAlertMessage("Failed to update task on server");
-            editTodoInState(taskID, contentBackup);
-        }
-    };
-
-    const toggleDone = async (taskID: string) => {
-        const task = todos.get(taskID);
-        if (!task) {
-            return;
-        }
-
-        const doneValue = task.done;
-
-        toggleDoneInState(taskID);
-
-        try {
-            await editTaskOnDB(taskID, {done: !doneValue});
-            emitToggleDone({id: taskID, done: !doneValue});
-        } catch (error) {
-            setAlertMessage("Failed to update task on server");
-            toggleDoneInState(taskID);
-        }
-    };
-
-    function getTasksByDoneValue(done: boolean) {
-        return new Map([...todos].filter(([_, taskData]) => taskData.done === done));
-    }
-
-    const tasksArrayToMap = (tasks: Todo[]) => {
-        const resultMap = new Map();
-        tasks.forEach(task => {
-            const {id, ...rest} = task;
-            resultMap.set(id, rest);
-        });
-        return resultMap;
-    }
-
-    useEffect(() => {
-        getTasksFromDB()
-            .then((tasks) => {
-                const tasksMap = tasksArrayToMap(tasks);
-                setTodos(tasksMap);
-            })
-            .catch((error) => {
-                setAlertMessage(error.message);
-            }).finally(() => {
-                setIsLoading(false);
-        });
-    }, []);
-
     return (
         <Box sx={{height: '90%'}}>
             <TodoInput addTodo={addTodo}/>
-            <TodoTabs tabIndex={tabIndex} setTabIndex={setTabIndex}/>
-
-            {isLoading ? (<Loading/>) : (
-                tabIndex === TODO_TAB ? (
-                    <TodoList todos={getTasksByDoneValue(false)} remove={deleteTodo} edit={editContent}
-                              toggleDone={toggleDone} isDone={false}/>
-                ) : (
-                    <TodoList todos={getTasksByDoneValue(true)} remove={deleteTodo} edit={editContent}
-                              toggleDone={toggleDone} isDone={true}/>
-                )
-            )}
+            <ListContainer setAlertMessage={setAlertMessage} todos={todos} setTodos={setTodos}/>
         </Box>
     )
 }
