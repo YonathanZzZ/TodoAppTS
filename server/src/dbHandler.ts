@@ -1,6 +1,6 @@
 import {Model, Sequelize, Table} from "sequelize-typescript";
 import {DataTypes, Optional} from "sequelize";
-import {Todo} from "../../shared/interfaces/todo-item.interface";
+import {Todo} from "@shared/interfaces/todo-item.interface";
 
 const HASH_LENGTH = 60;
 

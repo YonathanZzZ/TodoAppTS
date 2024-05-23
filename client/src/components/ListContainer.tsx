@@ -5,7 +5,7 @@ import {Dispatch, SetStateAction, useEffect, useState} from "react";
 import {deleteTaskFromDB, editTaskOnDB, getTasksFromDB} from "../sendRequestToServer.ts";
 import {addTodoToState, deleteTodoFromState, editTodoInState, toggleDoneInState} from "../TodosStateFunctions.ts";
 import {emitEditTask, emitRemoveTask, emitToggleDone} from "../SocketManager.ts";
-import {Todo, TodoData} from "../../../shared/interfaces/todo-item.interface.ts";
+import {Todo, TodoData} from "@shared/interfaces/todo-item.interface.ts";
 
 interface ListContainerProps{
     setAlertMessage: Dispatch<SetStateAction<string>>

@@ -15,7 +15,7 @@ import {
 import {useSelector} from "react-redux";
 import {RootState} from "../redux/store.tsx";
 import ListContainer from "./ListContainer.tsx";
-import {TodoData} from "../../../shared/interfaces/todo-item.interface.ts";
+import {TodoData} from "@shared/interfaces/todo-item.interface.ts";
 
 interface TodoContainerProps {
     setAlertMessage: Dispatch<SetStateAction<string>>;

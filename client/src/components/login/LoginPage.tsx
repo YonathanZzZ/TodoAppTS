@@ -19,7 +19,8 @@ export const LoginPage = () => {
     const passwordInput = useRef("");
     const [inputErrors, setInputErrors] = useState({email: "", password: ""});
     const [alertMessage, setAlertMessage] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoginLoading, setIsLoginLoading] = useState(false);
+    const [isRegisterLoading, setIsRegisterLoading] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -140,9 +141,9 @@ export const LoginPage = () => {
             return;
         }
 
-        setIsLoading(true);
+        setIsLoginLoading(true);
         await loginUser();
-        setIsLoading(false);
+        setIsLoginLoading(false);
     };
 
     const handleRegisterButton = async () => {
@@ -153,13 +154,13 @@ export const LoginPage = () => {
         }
 
         try {
-            setIsLoading(true);
+            setIsRegisterLoading(true);
             await addUser(emailInput.current, passwordInput.current);
             await loginUser();
         } catch (error: any) {
             setAlertMessage(getAlertMessage(error));
         }finally {
-            setIsLoading(false);
+            setIsRegisterLoading(false);
         }
     }
 
@@ -222,12 +223,12 @@ export const LoginPage = () => {
                 <Stack direction="row" justifyContent="space-between">
                     <LoginButton
                         text="Login"
-                        isLoading={isLoading}
+                        isLoading={isLoginLoading}
                         handleClick={handleLoginButton}
                     />
                     <LoginButton
                         text="Register"
-                        isLoading={isLoading}
+                        isLoading={isRegisterLoading}
                         handleClick={handleRegisterButton}
                     />
                 </Stack>
