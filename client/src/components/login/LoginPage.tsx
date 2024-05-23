@@ -1,6 +1,6 @@
 import Stack from "@mui/material/Stack";
 import {Box, TextField} from "@mui/material";
-import React, {useRef, useState} from "react";
+import React, {useState} from "react";
 import {addUser, getAccessToken} from "../../sendRequestToServer.ts";
 import Cookies from 'js-cookie';
 import isEmail from 'validator/lib/isEmail';
@@ -15,8 +15,8 @@ export const LoginPage = () => {
 
     // const [emailInput, setEmailInput] = useState("");
     // const [passwordInput, setPasswordInput] = useState("");
-    const emailInput = useRef("");
-    const passwordInput = useRef("");
+    const [emailInput, setEmailInput] = useState("");
+    const [passwordInput, setPasswordInput] = useState("");
     const [inputErrors, setInputErrors] = useState({email: "", password: ""});
     const [alertMessage, setAlertMessage] = useState("");
     const [isLoginLoading, setIsLoginLoading] = useState(false);
@@ -36,7 +36,7 @@ export const LoginPage = () => {
     const areRegisterFieldsValid = () => {
         let isValid = true;
 
-        if (!isEmail(emailInput.current)) {
+        if (!isEmail(emailInput)) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 email: "Invalid email address"
@@ -45,7 +45,7 @@ export const LoginPage = () => {
             isValid = false;
         }
 
-        if (!isPasswordValid(passwordInput.current)) {
+        if (!isPasswordValid(passwordInput)) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 password: "Password must be at least 8 characters long and contain at least 1 digit and 1 lowercase and uppercase letters",
@@ -88,14 +88,14 @@ export const LoginPage = () => {
 
     const loginUser = async () => {
         try {
-            const token = await getAccessToken(emailInput.current, passwordInput.current);
+            const token = await getAccessToken(emailInput, passwordInput);
 
             Cookies.set('token', token, {
                 sameSite: 'strict',
                 secure: true
             });
 
-            dispatch(userActions.login({email: emailInput.current}));
+            dispatch(userActions.login({email: emailInput}));
             navigate('/');
 
         } catch (error) {
@@ -122,7 +122,7 @@ export const LoginPage = () => {
             }));
 
             valid = false;
-        } else if (!isEmail(emailInput.current)) {
+        } else if (!isEmail(emailInput)) {
             setInputErrors(prevErrors => ({
                 ...prevErrors,
                 email: "Invalid email",
@@ -155,7 +155,7 @@ export const LoginPage = () => {
 
         try {
             setIsRegisterLoading(true);
-            await addUser(emailInput.current, passwordInput.current);
+            await addUser(emailInput, passwordInput);
             await loginUser();
         } catch (error: any) {
             setAlertMessage(getAlertMessage(error));
@@ -199,7 +199,7 @@ export const LoginPage = () => {
                 error={Boolean(inputErrors.email)}
                 helperText={inputErrors.email}
                 onChange={(e) => {
-                    emailInput.current = e.target.value;
+                    setEmailInput(e.target.value);
                 }}
                 onKeyDown={handleKeyDown}
             />
@@ -214,7 +214,7 @@ export const LoginPage = () => {
                 error={Boolean(inputErrors.password)}
                 helperText={inputErrors.password}
                 onChange={(e) => {
-                    passwordInput.current = e.target.value;
+                    setPasswordInput(e.target.value);
                 }}
                 onKeyDown={handleKeyDown}
             />
@@ -224,11 +224,13 @@ export const LoginPage = () => {
                     <LoginButton
                         text="Login"
                         isLoading={isLoginLoading}
+                        disabled={!emailInput || !passwordInput}
                         handleClick={handleLoginButton}
                     />
                     <LoginButton
                         text="Register"
                         isLoading={isRegisterLoading}
+                        disabled={!emailInput || !passwordInput}
                         handleClick={handleRegisterButton}
                     />
                 </Stack>

@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 interface LoginButtonProps {
     text: string,
     isLoading: boolean,
+    disabled: boolean,
     handleClick: () => void
 }
 
@@ -13,9 +14,9 @@ declare module "@mui/material" {
     }
 }
 
-const LoginButton = ({text, isLoading, handleClick}: LoginButtonProps) => {
+const LoginButton = ({text, isLoading, disabled, handleClick}: LoginButtonProps) => {
     return (
-        <Button variant="contained" onClick={handleClick}>
+        <Button variant="contained" onClick={handleClick} disabled={disabled}>
             {isLoading ? <CircularProgress color="background"/> : text}
         </Button>
     )
