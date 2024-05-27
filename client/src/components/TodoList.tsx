@@ -1,11 +1,11 @@
-import React, {useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {List, ListItem} from '@mui/material';
 import Divider from '@mui/material/Divider';
 import {EditedItem} from "./EditedItem";
 import {TodoItem} from "./TodoItem";
 import {TodoData} from "@shared/interfaces/todo-item.interface.ts";
 
-interface TodoListProps{
+interface TodoListProps {
     todos: Map<string, TodoData>;
     remove: (taskID: string) => void;
     edit: (taskID: string, updatedContent: string) => void;
@@ -15,26 +15,22 @@ interface TodoListProps{
 
 const TodoList = ({todos, remove, edit, toggleDone, isDone}: TodoListProps) => {
     const [editingTaskID, setEditingTaskID] = useState("");
-    // const [editedText, setEditedText] = useState('');
-    const editedText = useRef("");
 
-    const startEditing = (taskID: string, text: string) => {
+    const startEditing = (taskID: string, _text: string) => {
         setEditingTaskID(taskID);
-        // setEditedText(text);
-        editedText.current = text;
     };
 
     const cancelEditing = () => {
         setEditingTaskID("");
-        // setEditedText('');
-        editedText.current = '';
     };
 
-    const saveEditing = (taskID: string) => {
-        if (editedText.current.trim() !== '') {
-            edit(taskID, editedText.current);
-            cancelEditing();
+    const saveEditing = (taskID: string, newContent: string) => {
+        if (newContent.trim() === '') {
+            return;
         }
+
+        edit(taskID, newContent);
+        cancelEditing();
     };
 
     return (
@@ -45,7 +41,7 @@ const TodoList = ({todos, remove, edit, toggleDone, isDone}: TodoListProps) => {
                         {editingTaskID === taskID ? (
                             <EditedItem
                                 taskID={taskID}
-                                editedText={editedText}
+                                textBeforeEdit={taskData.content}
                                 saveEditing={saveEditing}
                                 cancelEditing={cancelEditing}
                             />
@@ -61,7 +57,7 @@ const TodoList = ({todos, remove, edit, toggleDone, isDone}: TodoListProps) => {
                         )}
                     </ListItem>
                     {/* add divider to list items except the last one */}
-                     {index !== todos.size - 1 && <Divider component="li" />}
+                    {index !== todos.size - 1 && <Divider component="li"/>}
                 </React.Fragment>
             ))}
         </List>

@@ -12,9 +12,6 @@ import {useNavigate} from "react-router-dom";
 import LoginButton from "./LoginButton.tsx";
 
 export const LoginPage = () => {
-
-    // const [emailInput, setEmailInput] = useState("");
-    // const [passwordInput, setPasswordInput] = useState("");
     const [emailInput, setEmailInput] = useState("");
     const [passwordInput, setPasswordInput] = useState("");
     const [inputErrors, setInputErrors] = useState({email: "", password: ""});

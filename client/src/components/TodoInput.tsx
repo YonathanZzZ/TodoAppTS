@@ -29,6 +29,7 @@ const TodoInput = ({addTodo}: TodoInputProps) => {
                 id="todo-field"
                 autoFocus={true}
                 variant="filled"
+
                 label="Enter task"
                 value={input}
                 fullWidth={true}
@@ -39,7 +40,7 @@ const TodoInput = ({addTodo}: TodoInputProps) => {
                 onKeyDown={handleKeyDown}
             />
 
-            <Button size="small" variant="contained" onClick={handleClick}>Add Task</Button>
+            <Button size="small" variant="contained" onClick={handleClick} disabled={!input}>Add Task</Button>
 
         </div>
     );

@@ -1,31 +1,34 @@
 import {TextField} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import {MutableRefObject} from "react";
+import {useState} from "react";
+import DoneIcon from "@mui/icons-material/Done";
 
 interface EditedItemProps {
     taskID: string
-    editedText: MutableRefObject<string>
-    saveEditing: (taskID: string) => void
+    textBeforeEdit: string
+    saveEditing: (taskID: string, newContent: string) => void
     cancelEditing: () => void
 }
 
-export const EditedItem = ({taskID, editedText, saveEditing, cancelEditing}: EditedItemProps) => {
+export const EditedItem = ({taskID, textBeforeEdit,saveEditing, cancelEditing}: EditedItemProps) => {
+    const [editedText, setEditedText] = useState(textBeforeEdit);
+
     return (
         <>
             <TextField
                 autoFocus={true}
                 variant="filled"
                 fullWidth={true}
-                onChange={(e) => editedText.current = e.target.value}
+                onChange={(e) => setEditedText(e.target.value)}
+                value={editedText}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                        saveEditing(taskID);
-                    } else if (e.key === 'Escape') {
-                        cancelEditing();
+                        saveEditing(taskID, editedText);
                     }
                 }}
             />
+
             <IconButton
                 edge="end"
                 size="small"
@@ -33,6 +36,15 @@ export const EditedItem = ({taskID, editedText, saveEditing, cancelEditing}: Edi
                 onClick={() => cancelEditing()}
             >
                 <CloseIcon/>
+            </IconButton>
+
+            <IconButton
+                edge="end"
+                size="small"
+                color="secondary"
+                onClick={() => saveEditing(taskID, editedText)}
+            >
+                <DoneIcon/>
             </IconButton>
         </>
     )
