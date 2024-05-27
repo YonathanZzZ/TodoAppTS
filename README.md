@@ -17,11 +17,11 @@ You can access the deployed Todo app [here](https://todo-app-tclient.vercel.app/
 
 ## Technologies Used
 
-* React.js: frontend (using TypeScript)
+* React.js (TypeScript)
 
-* Node.js (with Express): backend (server, using TypeScript)
+* Node.js Express (TypeScript)
 
-* Sequelize (SQL): storing user data including Todo lists and user credentials
+* Sequelize (SQL): storing tasks and user credentials
 
 * JWT: user authentication
 
